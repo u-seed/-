@@ -1,0 +1,202 @@
+{
+ "total": 45252,
+ "titles": [
+  "Люстра подвесная FUR HOUSE E14, кол-во ламп: 1 шт",
+  "Люстра потолочная FUR HOUSE GX53, кол-во ламп: 1 шт",
+  "Люстра потолочная FUR HOUSE E27, кол-во ламп: 1 шт",
+  "Люстра потолочная FUR HOUSE E27, кол-во ламп: 1 шт",
+  "Люстра подвесная Star E14, кол-во ламп: 1 шт",
+  "Люстра потолочная SADDY E27, кол-во ламп: 2 шт",
+  "Люстра накладная SADDY E27, кол-во ламп: 2 шт",
+  "Люстра потолочная E27, кол-во ламп: 1 шт",
+  "Люстра подвесная LED, кол-во ламп: 5 шт",
+  "Люстра потолочная E27, кол-во ламп: 4 шт",
+  "Люстра потолочная TOPLIGHT E27, кол-во ламп: 1 шт",
+  "Люстра подвесная Lustra Kostanay E27, кол-во ламп: 1 шт"
+ ],
+ "card_keys": [
+  "bestMerchant",
+  "brand",
+  "category",
+  "categoryCodes",
+  "categoryId",
+  "categoryRu",
+  "configSku",
+  "createdTime",
+  "creditMonthlyPrice",
+  "currency",
+  "deliveryDuration",
+  "deliveryZones",
+  "hasVariants",
+  "id",
+  "isBrandOfficialPartner",
+  "loanAvailable",
+  "majorMerchants",
+  "mods",
+  "monthlyInstallment",
+  "previewImages",
+  "priceFormatted",
+  "promo",
+  "rating",
+  "reviewsLink",
+  "reviewsQuantity",
+  "shopLink",
+  "shortNameText",
+  "stickers",
+  "stock",
+  "teasers",
+  "title",
+  "unit",
+  "unitPrice",
+  "unitSalePrice",
+  "weight"
+ ],
+ "filters": [
+  {
+   "id": "price",
+   "rows": [
+    ":price:до 10 000 т",
+    ":price:10 000 - 49 999 т",
+    ":price:50 000 - 99 999 т",
+    ":price:100 000 - 149 999 т",
+    ":price:150 000 - 199 999 т",
+    ":price:200 000 - 499 999 т",
+    ":price:более 500 000 т"
+   ]
+  },
+  {
+   "id": "manufacturerName",
+   "rows": [
+    ":manufacturerName:1001 ночь",
+    ":manufacturerName:21vek",
+    ":manufacturerName:21 ВЕК СВЕТ",
+    ":manufacturerName:3D PUZZLE",
+    ":manufacturerName:99",
+    ":manufacturerName:ABC",
+    ":manufacturerName:ABIS ",
+    ":manufacturerName:A Brand",
+    ":manufacturerName:ADA",
+    ":manufacturerName:ADEMI LUSTRA"
+   ]
+  },
+  {
+   "id": "Chandeliers*Max lightning area1",
+   "rows": []
+  },
+  {
+   "id": "Chandeliers*Room",
+   "rows": [
+    ":Chandeliers*Room:ванная комната",
+    ":Chandeliers*Room:гостиная",
+    ":Chandeliers*Room:детская",
+    ":Chandeliers*Room:кухня",
+    ":Chandeliers*Room:лестничный проем",
+    ":Chandeliers*Room:спальня"
+   ]
+  },
+  {
+   "id": "Chandeliers*Colour",
+   "rows": [
+    ":Chandeliers*Colour:бежевый",
+    ":Chandeliers*Colour:белый",
+    ":Chandeliers*Colour:бирюзовый",
+    ":Chandeliers*Colour:бордовый",
+    ":Chandeliers*Colour:бронза",
+    ":Chandeliers*Colour:голубой",
+    ":Chandeliers*Colour:желтый",
+    ":Chandeliers*Colour:зеленый",
+    ":Chandeliers*Colour:золотистый",
+    ":Chandeliers*Colour:коричневый"
+   ]
+  },
+  {
+   "id": "Chandeliers*Number of lights1",
+   "rows": []
+  },
+  {
+   "id": "Chandeliers*Installation",
+   "rows": [
+    ":Chandeliers*Installation:люстра вентилятор",
+    ":Chandeliers*Installation:люстра каскадная",
+    ":Chandeliers*Installation:люстра на штанге",
+    ":Chandeliers*Installation:люстра подвесная",
+    ":Chandeliers*Installation:люстра потолочная",
+    ":Chandeliers*Installation:накладной"
+   ]
+  },
+  {
+   "id": "Chandeliers*Shade material",
+   "rows": [
+    ":Chandeliers*Shade material:акрил",
+    ":Chandeliers*Shade material:алебастр",
+    ":Chandeliers*Shade material:алюминий",
+    ":Chandeliers*Shade material:бамбук",
+    ":Chandeliers*Shade material:без плафона",
+    ":Chandeliers*Shade material:бетон",
+    ":Chandeliers*Shade material:бумага",
+    ":Chandeliers*Shade material:войлок",
+    ":Chandeliers*Shade material:гипс",
+    ":Chandeliers*Shade material:дерево"
+   ]
+  },
+  {
+   "id": "Chandeliers*Base type",
+   "rows": [
+    ":Chandeliers*Base type:E12",
+    ":Chandeliers*Base type:E14",
+    ":Chandeliers*Base type:E17",
+    ":Chandeliers*Base type:E26",
+    ":Chandeliers*Base type:E27",
+    ":Chandeliers*Base type:E40",
+    ":Chandeliers*Base type:G13",
+    ":Chandeliers*Base type:G23",
+    ":Chandeliers*Base type:G4",
+    ":Chandeliers*Base type:G53"
+   ]
+  },
+  {
+   "id": "Chandeliers*Features",
+   "rows": [
+    ":Chandeliers*Features:изменение цветовой температуры",
+    ":Chandeliers*Features:многоцветность",
+    ":Chandeliers*Features:поворотный патрон",
+    ":Chandeliers*Features:подключение к системе умного дома",
+    ":Chandeliers*Features:пульт ДУ",
+    ":Chandeliers*Features:пылевлагозащита",
+    ":Chandeliers*Features:регулировка по высоте",
+    ":Chandeliers*Features:регулировка яркости (диммируемая)",
+    ":Chandeliers*Features:управление со смартфона"
+   ]
+  },
+  {
+   "id": "Chandeliers*Voltage",
+   "rows": [
+    ":Chandeliers*Voltage:120-240В",
+    ":Chandeliers*Voltage:160-260В",
+    ":Chandeliers*Voltage:165-265В",
+    ":Chandeliers*Voltage:170-260В",
+    ":Chandeliers*Voltage:170-265В",
+    ":Chandeliers*Voltage:180-240В",
+    ":Chandeliers*Voltage:220-230В",
+    ":Chandeliers*Voltage:220-240В",
+    ":Chandeliers*Voltage:220-250В",
+    ":Chandeliers*Voltage:220В"
+   ]
+  },
+  {
+   "id": "allMerchants",
+   "rows": [
+    ":allMerchants:18194006",
+    ":allMerchants:30447206",
+    ":allMerchants:12Mesyacev",
+    ":allMerchants:30432380",
+    ":allMerchants:30482922",
+    ":allMerchants:30335568",
+    ":allMerchants:30457883",
+    ":allMerchants:30202640",
+    ":allMerchants:30318527",
+    ":allMerchants:30368657"
+   ]
+  }
+ ]
+}
