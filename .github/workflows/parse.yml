@@ -6,8 +6,6 @@ on:
         description: "Ссылка на карточку-эталон Kaspi (необязательно, добавит её в базу)"
         required: false
         default: ""
-  schedule:
-    - cron: "0 1 * * *"   # каждый день в 06:00 по Актау
 permissions:
   contents: write
 jobs:
