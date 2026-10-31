@@ -1,16 +1,1 @@
-{
-  "name": "Сводка ҚБМ",
-  "short_name": "Сводка",
-  "description": "Ежедневная сводка показателей АО Қаражанбасмұнай",
-  "start_url": "./",
-  "scope": "./",
-  "display": "standalone",
-  "background_color": "#0b1220",
-  "theme_color": "#0b1220",
-  "orientation": "portrait",
-  "lang": "ru",
-  "icons": [
-    { "src": "icon-192-1.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "icon-512-1.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
-  ]
-}
+{"name":"Каспи: люстры и бра","short_name":"Люстры","start_url":"./","scope":"./","display":"standalone","background_color":"#14110d","theme_color":"#14110d","lang":"ru","icons":[{"src":"icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},{"src":"icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}]}

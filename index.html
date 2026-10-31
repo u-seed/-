@@ -1,375 +1,284 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#0b1220">
-<title>Сводка ҚБМ</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14110d">
 <link rel="manifest" href="manifest.json">
-<link rel="icon" href="icon-192-1.png">
-<link rel="apple-touch-icon" href="icon-192-1.png">
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<link rel="icon" href="icon-192.png">
+<title>Каспи: люстры и бра</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{background:#0b1220;color:#e7eaf3;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:15px;line-height:1.4;min-height:100vh}
-body{padding-bottom:env(safe-area-inset-bottom)}
-.topbar{position:sticky;top:0;z-index:10;background:#0e1729;border-bottom:1px solid #1e2a44;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;padding-top:max(12px,env(safe-area-inset-top))}
-.brand{display:flex;align-items:center;gap:12px}
-.logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#2b5cff,#1ec8a7);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff}
-.title{font-size:17px;font-weight:700}
-.subtitle{font-size:12px;color:#8d97b0;margin-top:1px}
-.actions{display:flex;gap:6px}
-.btn-icon{background:#1a2540;border:none;color:#cfd6e8;width:42px;height:42px;border-radius:10px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;text-decoration:none}
-.btn-icon:active{background:#243155}
-.btn-icon.primary{background:#2b5cff;color:#fff}
-.btn-icon.primary:active{background:#1f47cc}
-main{padding:14px;max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
-.hero{background:linear-gradient(135deg,#1a3a8c 0%,#0f5e5b 100%);border-radius:18px;padding:22px 20px;box-shadow:0 8px 24px rgba(11,30,80,.35)}
-.hero-label{font-size:13px;color:#a9c0ff;text-transform:uppercase;letter-spacing:1px;font-weight:600}
-.hero-value{font-size:48px;font-weight:800;margin:6px 0 8px;font-variant-numeric:tabular-nums}
-.hero-meta{display:flex;align-items:center;gap:10px;font-size:13px;color:#cad7ff}
-.delta{padding:3px 9px;border-radius:8px;background:rgba(255,255,255,.12);font-weight:600}
-.delta.up{background:rgba(40,200,120,.22);color:#52ffa8}
-.delta.down{background:rgba(255,80,90,.22);color:#ff8088}
-.dot{opacity:.5}
-.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.kpi{background:#131c34;border:1px solid #1e2a44;border-radius:14px;padding:14px}
-.kpi-label{font-size:11.5px;color:#8d97b0;text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:6px}
-.kpi-value{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
-.kpi-sub{font-size:11.5px;color:#8d97b0;margin-top:4px}
-.card{background:#131c34;border:1px solid #1e2a44;border-radius:14px;padding:14px}
-.card-title{font-size:13px;font-weight:600;color:#cfd6e8;margin-bottom:12px;display:flex;justify-content:space-between;align-items:baseline;gap:10px}
-.muted{color:#8d97b0;font-weight:400}
-.small{font-size:11.5px}
-.big{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:2px}
-.month-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:10px}
-.month-row:last-child{margin-bottom:0}
-#chart{width:100%;height:180px;display:block}
-.fund-block{display:flex;flex-direction:column;gap:10px}
-.fund-h{font-size:11.5px;color:#8d97b0;text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-top:4px}
-.fund-row{display:grid;grid-template-columns:auto 1fr auto 1fr auto 1fr;gap:6px 10px;align-items:center;font-size:13px}
-.fund-row span{color:#8d97b0}
-.fund-row b{font-weight:700;font-variant-numeric:tabular-nums;text-align:right}
-.foot{display:flex;justify-content:space-between;align-items:center;padding:6px 4px 30px;font-size:12px;flex-wrap:wrap;gap:10px}
-.foot button{background:none;border:none;color:#5b88ff;cursor:pointer;text-decoration:underline;font-size:13px;padding:0}
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#2b5cff;color:#fff;padding:12px 20px;border-radius:12px;font-size:14px;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,.4);opacity:0;transition:opacity .3s;pointer-events:none}
-.toast.show{opacity:1}
+:root{--bg:#14110d;--card:#201b15;--line:#372e23;--tx:#f1ebe2;--mut:#a39887;--acc:#f0b34a;--ok:#4cc38a;--bad:#ef6f5e;--link:#6cb6ff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.4 -apple-system,Segoe UI,Roboto,sans-serif;padding-bottom:60px}
+header{padding:12px 14px 4px}
+h1{font-size:19px;margin:0}
+.sub{color:var(--mut);font-size:12.5px;margin-top:2px}
+.tabs{display:flex;gap:6px;padding:8px 12px;position:sticky;top:0;background:var(--bg);z-index:5;border-bottom:1px solid var(--line)}
+.tab{flex:1;text-align:center;padding:10px 2px;border-radius:10px;background:var(--card);border:1px solid var(--line);color:var(--mut);font-size:13px;white-space:nowrap;cursor:pointer}
+.tab.on{color:#14110d;background:var(--acc);border-color:var(--acc);font-weight:700}
+.panel{display:none}.panel.on{display:block}
+.chips{display:flex;flex-wrap:wrap;gap:6px;padding:6px 14px}
+.chip{padding:6px 11px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-size:13.5px;color:var(--mut);cursor:pointer;user-select:none}
+.chip.on{border-color:var(--acc);color:var(--acc);font-weight:600}
+.ctrl{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:6px 14px}
+.ctrl input,.ctrl select,.inp{width:100%;background:var(--card);color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:10px;font-size:14px}
+.ctrl .full{grid-column:1/3}
+.chk{display:flex;gap:14px;padding:4px 14px 6px;font-size:13.5px;color:var(--mut);flex-wrap:wrap}
+.chk label{display:flex;gap:6px;align-items:center}
+.count{padding:2px 14px 8px;color:var(--mut);font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;margin:0 12px 10px;padding:12px}
+.row{display:flex;gap:12px}
+.card img{width:84px;height:84px;object-fit:cover;background:#fff;border-radius:10px;flex:none}
+.t{font-weight:600;font-size:14.5px}
+.price{font-size:19px;font-weight:700;margin-top:2px}
+.old{font-size:12.5px;color:var(--mut);font-weight:400;margin-left:6px;text-decoration:line-through}
+.badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.b{background:#17130e;border:1px solid var(--line);border-radius:8px;padding:3px 8px;font-size:12.5px}
+.b.d{border-color:var(--acc);color:var(--acc);font-weight:700}
+.b.new{border-color:var(--ok);color:var(--ok);font-weight:700}
+.b.dn{border-color:var(--ok);color:var(--ok)}
+.b.up{border-color:var(--bad);color:var(--bad)}
+.btns{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.btn{background:#17130e;color:var(--link);border:1px solid var(--line);border-radius:9px;padding:7px 11px;font-size:13px;text-decoration:none;cursor:pointer}
+.btn.star{color:var(--acc)}
+.more{display:block;margin:6px 12px 14px;text-align:center;padding:11px}
+.empty,.note{color:var(--mut);padding:18px 14px;font-size:14px}
+.note b{color:var(--tx)}
+.ref{border-color:var(--acc)}
+.delta{font-size:13px;font-weight:700;margin-top:4px}
+.delta.ok{color:var(--ok)}.delta.bad{color:var(--bad)}.delta.eq{color:var(--mut)}
+.sec{padding:10px 14px 4px;color:var(--acc);font-weight:700;font-size:14px}
+.find{display:flex;gap:8px;padding:8px 14px}
+.find .inp{flex:1}
+.find .btn{background:var(--acc);color:#14110d;font-weight:700;border-color:var(--acc)}
 </style>
 </head>
 <body>
-
-<header class="topbar">
-  <div class="brand">
-    <div class="logo">КБМ</div>
-    <div>
-      <div class="title">Сводка</div>
-      <div class="subtitle" id="lastDate">—</div>
-    </div>
-  </div>
-  <div class="actions">
-    <label class="btn-icon primary" for="fileInput" title="Загрузить XLSX">📂</label>
-    <input id="fileInput" type="file" accept=".xlsx,.xlsm" hidden>
-    <button class="btn-icon" onclick="location.reload()" title="Обновить">↻</button>
-  </div>
+<header>
+  <h1>Люстры и бра · Kaspi</h1>
+  <div class="sub" id="meta">загрузка…</div>
 </header>
+<div class="tabs">
+  <div class="tab on" data-tab="cat">Каталог</div>
+  <div class="tab" data-tab="match">Найти такую же</div>
+  <div class="tab" data-tab="fav">⭐ <span id="favn">0</span></div>
+</div>
 
-<main>
+<div class="panel on" id="p-cat">
+  <div class="chips" id="kinds"></div>
+  <div class="chips" id="sizes"></div>
+  <div class="ctrl">
+    <input class="full" id="q" placeholder="Поиск: название, бренд, цоколь" autocomplete="off">
+    <input id="pmin" type="number" inputmode="numeric" placeholder="Цена от">
+    <input id="pmax" type="number" inputmode="numeric" placeholder="Цена до" value="100000">
+    <select class="full" id="sort">
+      <option value="price">Сначала дешёвые</option>
+      <option value="new">Сначала новые</option>
+      <option value="drop">Сначала подешевевшие</option>
+      <option value="diam">Диаметр: большие</option>
+    </select>
+  </div>
+  <div class="chk">
+    <label><input type="checkbox" id="onlynew"> 🆕 новые сегодня</label>
+    <label><input type="checkbox" id="onlydrop"> ↓ подешевели</label>
+  </div>
+  <div class="count" id="count"></div>
+  <div id="list"></div>
+</div>
 
-  <section class="hero">
-    <div class="hero-label">Добыча за сутки, т</div>
-    <div class="hero-value" id="heroQn">—</div>
-    <div class="hero-meta">
-      <span id="heroDelta" class="delta">—</span>
-      <span class="dot">·</span>
-      <span id="heroFact">Qн факт: —</span>
-    </div>
-  </section>
+<div class="panel" id="p-match">
+  <div class="note">Вставь ссылку на карточку Kaspi (эталон). Покажу такие же и похожие по фото, от дешёвых к дорогим. Работает по люстрам из нашей базы.</div>
+  <div class="find"><input class="inp" id="refin" placeholder="https://kaspi.kz/shop/p/…" autocomplete="off"><button class="btn" id="go">Найти</button></div>
+  <div class="ctrl">
+    <select class="full" id="thr">
+      <option value="25">Только то же фото (строго)</option>
+      <option value="55" selected>Такая же модель (средне)</option>
+      <option value="85">Похожий вид (широко)</option>
+    </select>
+  </div>
+  <div class="chips" id="msizes"></div>
+  <div id="mres"></div>
+</div>
 
-  <section class="kpi-grid">
-    <div class="kpi"><div class="kpi-label">Сдача, т/сут</div><div class="kpi-value" id="kSdacha">—</div><div class="kpi-sub" id="kSdachaSub">—</div></div>
-    <div class="kpi"><div class="kpi-label">Жидкость ДНС, м³/сут</div><div class="kpi-value" id="kZh">—</div><div class="kpi-sub" id="kObv">обв. —</div></div>
-    <div class="kpi"><div class="kpi-label">Технол. потери, т</div><div class="kpi-value" id="kLoss">—</div><div class="kpi-sub" id="kLossSub">—</div></div>
-    <div class="kpi"><div class="kpi-label">Остаток в парке, т</div><div class="kpi-value" id="kPark">—</div><div class="kpi-sub" id="kParkSub">—</div></div>
-  </section>
-
-  <section class="card">
-    <div class="card-title"><span id="monthName">Месяц</span><span class="muted" id="monthDays">— из — дней</span></div>
-    <div class="month-row">
-      <div><div class="muted small">Добыча накоп., т</div><div class="big" id="mDob">—</div></div>
-      <div><div class="muted small">Сдача накоп., т</div><div class="big" id="mSd">—</div></div>
-    </div>
-    <div class="month-row">
-      <div><div class="muted small">Средне в сутки, т</div><div class="big" id="mAvg">—</div></div>
-      <div><div class="muted small">Прогноз на месяц, т</div><div class="big" id="mFor">—</div></div>
-    </div>
-  </section>
-
-  <section class="card">
-    <div class="card-title">Добыча по дням, т<span class="muted small" id="chartRange">—</span></div>
-    <canvas id="chart" height="180"></canvas>
-  </section>
-
-  <section class="kpi-grid">
-    <div class="kpi"><div class="kpi-label">Пар всего за месяц, т</div><div class="kpi-value" id="kPar">—</div><div class="kpi-sub" id="kParSub">ППГ-3 / СПГУ / МПГУ</div></div>
-    <div class="kpi"><div class="kpi-label">Закачка воды, м³</div><div class="kpi-value" id="kZak">—</div><div class="kpi-sub" id="kZakSub">внутрикон. / закон.</div></div>
-    <div class="kpi"><div class="kpi-label">Газ всего, тыс.м³</div><div class="kpi-value" id="kGas">—</div><div class="kpi-sub" id="kGasSub">Каламкас + попутный</div></div>
-    <div class="kpi"><div class="kpi-label">ОЗПВ, м³</div><div class="kpi-value" id="kOzpv">—</div><div class="kpi-sub">опресн. вода</div></div>
-  </section>
-
-  <section class="card">
-    <div class="card-title">Фонд скважин</div>
-    <div class="fund-block">
-      <div class="fund-h">Добывающий фонд (действующий)</div>
-      <div class="fund-row"><span>Фонтан</span><b id="fFlow">—</b><span>ШГН</span><b id="fPump">—</b><span>Всего</span><b id="fTotal">—</b></div>
-      <div class="fund-h">В простое</div>
-      <div class="fund-row"><span>Фонтан</span><b id="fInFlow">—</b><span>ШГН</span><b id="fInPump">—</b><span>Всего</span><b id="fInTotal">—</b></div>
-      <div class="fund-h">Нагнетательный фонд (действующий)</div>
-      <div class="fund-row"><span>Пар</span><b id="fInjSt">—</b><span>Вода</span><b id="fInjW">—</b><span>Всего</span><b id="fInjT">—</b></div>
-    </div>
-  </section>
-
-  <footer class="foot">
-    <button onclick="loadDemo()">Загрузить демо</button>
-    <button onclick="clearCache()">Очистить кэш</button>
-    <div class="muted small" id="srcInfo">—</div>
-  </footer>
-
-</main>
-
-<div class="toast" id="toast"></div>
+<div class="panel" id="p-fav"><div id="flist"></div></div>
 
 <script>
-// === КОНФИГ ===
-const PARAM_ROWS = {qn_tov:5,qn_fact:17,loss:29,sdacha:41,park:53,qzh_tot:65,qzh_clean:77,dns_in:89,obv:90,par_all:161,drop_w:173,bitum:185,ozpv:209};
-const SUMMARY_ROWS = {dob:4,sd:5,bit:6,zh:7,park:9,pg3:11,mpgu:12,spgu:13,par:14,zak_int:20,zak_ext_sum:27,vlz:31,gaz:35,ozpv:38};
-const MONTHS = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
-const MONTH_NAMES = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
-const STORAGE_KEY = 'svodka_v3';
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt=n=>Number(n).toLocaleString("ru-RU")+" ₸";
+const load=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}};
+const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+const KINDS={chandelier:"Люстры",sconce:"Бра"};
+let DATA=[],META={},BY={},FAV=load("kl_fav",{}),KIND="all",SIZES=new Set(),MSIZES=new Set(),SHOW=40,REFID=null,MSHOW=40,MRES=[];
 
-const fmt = (v,dec=0) => v==null||isNaN(v) ? '—' : Number(v).toLocaleString('ru-RU',{minimumFractionDigits:dec,maximumFractionDigits:dec});
-const fmtK = v => v==null||isNaN(v) ? '—' : Math.abs(v)>=1e6 ? (v/1e6).toFixed(2)+' млн' : Math.abs(v)>=1e3 ? (v/1e3).toFixed(1)+' тыс' : fmt(v);
-const $ = id => document.getElementById(id);
-const sumArr = a => a.reduce((s,v)=>s+(typeof v==='number'?v:0),0);
-
-function toast(msg){
-  const t = $('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), 2500);
-}
-
-// === ПАРСЕР XLSX ===
-function parseXLSX(buf){
-  const wb = XLSX.read(buf,{type:'array',cellDates:true});
-  const data = {daily:{},monthly:{},fund:{},lastDate:null};
-
-  const n1 = wb.SheetNames.find(n=>n.includes('Мәліметтер')) || wb.SheetNames[0];
-  const a1 = XLSX.utils.sheet_to_json(wb.Sheets[n1],{header:1,defval:null,raw:true});
-  for(const [k,sr] of Object.entries(PARAM_ROWS)){
-    data.daily[k] = {};
-    for(let mi=0;mi<12;mi++){
-      const row = a1[sr-1+mi] || [];
-      const days = [];
-      for(let d=0;d<31;d++){ const v=row[3+d]; days.push(typeof v==='number'?v:null); }
-      data.daily[k][MONTHS[mi]] = days;
-    }
-  }
-
-  const n2 = wb.SheetNames.find(n=>n.trim().toLowerCase().startsWith('показатели'));
-  if(n2){
-    const a2 = XLSX.utils.sheet_to_json(wb.Sheets[n2],{header:1,defval:null,raw:true});
-    for(const [k,r] of Object.entries(SUMMARY_ROWS)){
-      const row = a2[r-1] || [];
-      data.monthly[k] = [];
-      for(let m=0;m<12;m++){ const v=row[2+m]; data.monthly[k].push(typeof v==='number'?v:0); }
-    }
-  }
-
-  const n3 = wb.SheetNames.find(n=>n.includes('рапорт'));
-  if(n3){
-    const a3 = XLSX.utils.sheet_to_json(wb.Sheets[n3],{header:1,defval:null,raw:true});
-    const g = (r,c) => { const row=a3[r-1]; return row?row[c-1]:null; };
-    data.fund = {flow:g(18,4),pump:g(18,6),total:g(18,8),inFlow:g(18,12),inPump:g(18,14),injSteamA:g(44,9),injWaterA:g(44,11),injTotalA:g(44,13)};
-  }
-
-  // последняя дата
-  const y = new Date().getFullYear();
-  outer: for(let mi=11;mi>=0;mi--){
-    const days = data.daily.qn_tov[MONTHS[mi]] || [];
-    for(let d=30;d>=0;d--){
-      if(days[d]!=null && days[d]!==0){ data.lastDate={y,m:mi,d:d+1}; break outer; }
-    }
-  }
-  return data;
-}
-
-// === РЕНДЕР ===
-function render(data){
-  if(!data || !data.lastDate){ $('lastDate').textContent='нет данных'; return; }
-  const {y,m,d} = data.lastDate;
-  $('lastDate').textContent = `${d} ${MONTH_NAMES[m].toLowerCase()} ${y}`;
-
-  const qn = data.daily.qn_tov[MONTHS[m]] || [];
-  const qnf = (data.daily.qn_fact[MONTHS[m]]) || [];
-  const today = qn[d-1], yest = d>1 ? qn[d-2] : null;
-  $('heroQn').textContent = fmt(today);
-  if(yest!=null){
-    const dlt = today-yest;
-    const el = $('heroDelta');
-    el.textContent = (dlt>=0?'▲ +':'▼ ')+fmt(dlt);
-    el.className = 'delta '+(dlt>=0?'up':'down');
-  } else $('heroDelta').textContent='—';
-  $('heroFact').textContent = 'Qн факт: '+fmt(qnf[d-1],1);
-
-  const sd = data.daily.sdacha[MONTHS[m]]||[], zh = data.daily.dns_in[MONTHS[m]]||[];
-  const obv = data.daily.obv[MONTHS[m]]||[], ls = data.daily.loss[MONTHS[m]]||[], pk = data.daily.park[MONTHS[m]]||[];
-  $('kSdacha').textContent = fmt(sd[d-1]);
-  $('kSdachaSub').textContent = 'месяц: '+fmt(sumArr(sd));
-  $('kZh').textContent = fmt(zh[d-1]);
-  $('kObv').textContent = 'обв. '+(obv[d-1]!=null?fmt(obv[d-1],1)+' %':'—');
-  $('kLoss').textContent = fmt(ls[d-1],1);
-  $('kLossSub').textContent = 'месяц: '+fmt(sumArr(ls),0);
-  $('kPark').textContent = fmt(pk[d-1]);
-  const pp = d>1?pk[d-2]:null;
-  $('kParkSub').textContent = pp!=null ? ((pk[d-1]-pp>=0?'+':'')+fmt(pk[d-1]-pp)+' к вчера') : '—';
-
-  $('monthName').textContent = MONTH_NAMES[m]+' '+y;
-  const dim = new Date(y,m+1,0).getDate();
-  $('monthDays').textContent = `${d} из ${dim} дней`;
-  const mDob = sumArr(qn), mSd = sumArr(sd), avg = mDob/d;
-  $('mDob').textContent = fmt(mDob);
-  $('mSd').textContent = fmt(mSd);
-  $('mAvg').textContent = fmt(avg,0);
-  $('mFor').textContent = fmt(avg*dim,0);
-
-  drawChart(qn.slice(0,d));
-  $('chartRange').textContent = `1–${d} ${MONTH_NAMES[m].toLowerCase()}`;
-
-  const mo = data.monthly||{};
-  if(mo.par){
-    $('kPar').textContent = fmt(mo.par[m]);
-    $('kParSub').textContent = `ППГ-3: ${fmt(mo.pg3[m])} · СПГУ: ${fmt(mo.spgu[m])} · МПГУ: ${fmt(mo.mpgu[m])}`;
-    $('kZak').textContent = fmt((mo.zak_int[m]||0)+(mo.zak_ext_sum[m]||0));
-    $('kZakSub').textContent = `вн: ${fmtK(mo.zak_int[m])} · сброс: ${fmtK(mo.zak_ext_sum[m])}`;
-    $('kGas').textContent = fmt(Math.round((mo.gaz[m]||0)/1000));
-    $('kGasSub').textContent = `всего: ${fmtK(mo.gaz[m])} м³`;
-    $('kOzpv').textContent = fmt(mo.ozpv[m]);
-  }
-
-  const f = data.fund||{};
-  $('fFlow').textContent = fmt(f.flow);
-  $('fPump').textContent = fmt(f.pump);
-  $('fTotal').textContent = fmt(f.total);
-  $('fInFlow').textContent = fmt(f.inFlow);
-  $('fInPump').textContent = fmt(f.inPump);
-  $('fInTotal').textContent = fmt((f.inFlow||0)+(f.inPump||0));
-  $('fInjSt').textContent = fmt(f.injSteamA);
-  $('fInjW').textContent = fmt(f.injWaterA);
-  $('fInjT').textContent = fmt(f.injTotalA);
-}
-
-// === ГРАФИК ===
-function drawChart(values){
-  const c = $('chart'), dpr=window.devicePixelRatio||1;
-  const w=c.clientWidth, h=c.clientHeight;
-  c.width=w*dpr; c.height=h*dpr;
-  const x=c.getContext('2d'); x.scale(dpr,dpr); x.clearRect(0,0,w,h);
-  const data = values.filter(v=>v!=null);
-  if(data.length<2) return;
-  const mn=Math.min(...data), mx=Math.max(...data), pad=(mx-mn)*0.15||100;
-  const yMn=mn-pad, yMx=mx+pad;
-  const xP=28, yP=18, pW=w-xP-8, pH=h-yP*2;
-  x.strokeStyle='#22304d'; x.lineWidth=1; x.font='10px sans-serif'; x.fillStyle='#6e7a99';
-  for(let i=0;i<=3;i++){
-    const yy=yP+pH*i/3;
-    x.beginPath(); x.moveTo(xP,yy); x.lineTo(w-4,yy); x.stroke();
-    x.fillText(Math.round(yMx-(yMx-yMn)*i/3), 2, yy+3);
-  }
-  x.strokeStyle='#5b88ff'; x.lineWidth=2; x.beginPath();
-  data.forEach((v,i)=>{
-    const px=xP+pW*i/(data.length-1), py=yP+pH*(1-(v-yMn)/(yMx-yMn));
-    if(i===0) x.moveTo(px,py); else x.lineTo(px,py);
-  });
-  x.stroke();
-  x.lineTo(xP+pW,h-yP); x.lineTo(xP,h-yP); x.closePath();
-  const g=x.createLinearGradient(0,yP,0,h);
-  g.addColorStop(0,'rgba(91,136,255,.35)'); g.addColorStop(1,'rgba(91,136,255,0)');
-  x.fillStyle=g; x.fill();
-  x.fillStyle='#5b88ff';
-  data.forEach((v,i)=>{
-    const px=xP+pW*i/(data.length-1), py=yP+pH*(1-(v-yMn)/(yMx-yMn));
-    x.beginPath(); x.arc(px,py,2.5,0,Math.PI*2); x.fill();
-  });
-  const lv=data[data.length-1];
-  const lx=xP+pW, ly=yP+pH*(1-(lv-yMn)/(yMx-yMn));
-  x.fillStyle='#e7eaf3'; x.font='bold 11px sans-serif'; x.textAlign='right';
-  x.fillText(fmt(lv), lx-4, ly-6);
-}
-
-// === ХРАНЕНИЕ ===
-function save(d){ try{localStorage.setItem(STORAGE_KEY,JSON.stringify(d));}catch(e){} }
-function load(){ try{return JSON.parse(localStorage.getItem(STORAGE_KEY));}catch(e){return null} }
-
-// === КНОПКИ ===
-function clearCache(){
-  if(confirm('Очистить все данные?')){
-    localStorage.removeItem(STORAGE_KEY);
-    location.reload();
-  }
-}
-
-function loadDemo(){
-  const d = JSON.parse(JSON.stringify(DEMO));
-  for(const k of Object.keys(PARAM_ROWS)){
-    if(!d.daily[k]) d.daily[k] = {};
-    for(const m of MONTHS) if(!d.daily[k][m]) d.daily[k][m] = Array(31).fill(null);
-  }
-  save(d); render(d);
-  $('srcInfo').textContent='Демо (19.05.2026)';
-  toast('Демо загружено');
-}
-
-// Обработчик файла - НАПРЯМУЮ, без модалок
-document.getElementById('fileInput').addEventListener('change', async function(e){
-  const f = e.target.files[0];
-  if(!f) return;
-  toast('Читаю файл...');
+/* ---------- данные ---------- */
+const bucket=d=>d==null?"?":String(Math.max(10,Math.round(d/10)*10));
+const isNew=x=>!META.first_run&&x.first_seen===META.date;
+const isDrop=x=>x.prev_price&&x.price<x.prev_price;
+async function init(){
   try{
-    const buf = await f.arrayBuffer();
-    const data = parseXLSX(buf);
-    save(data);
-    render(data);
-    $('srcInfo').textContent = f.name+' · '+new Date().toLocaleString('ru-RU');
-    toast('Готово ✓');
-  }catch(err){
-    alert('Ошибка: '+err.message);
-    console.error(err);
+    const r=await fetch("data.json?"+Date.now(),{cache:"no-store"});
+    const d=await r.json();
+    META=d;DATA=d.items||[];BY={};DATA.forEach(x=>{BY[x.id]=x;x._w=(x.dh||[]).map(words)});
+    $("meta").textContent=DATA.length?`Обновлено ${d.generated} · в базе ${DATA.length} (люстр ${d.kinds?d.kinds.chandelier:0}, бра ${d.kinds?d.kinds.sconce:0})`:"База пуста: запусти парсинг (Actions → parse-kaspi → Run workflow)";
+  }catch(e){$("meta").textContent="Не удалось загрузить data.json"}
+  renderChips();renderCat();renderFav();
+}
+
+/* ---------- вкладки ---------- */
+function setTab(t){
+  document.querySelectorAll(".tab").forEach(e=>e.classList.toggle("on",e.dataset.tab===t));
+  document.querySelectorAll(".panel").forEach(e=>e.classList.toggle("on",e.id==="p-"+t));
+  if(t==="fav")renderFav();
+  window.scrollTo(0,0);
+}
+document.querySelector(".tabs").addEventListener("click",e=>{const t=e.target.closest(".tab");if(t)setTab(t.dataset.tab)});
+
+/* ---------- каталог ---------- */
+function renderChips(){
+  const kinds=[["all","Все"],["chandelier","Люстры"],["sconce","Бра"]];
+  $("kinds").innerHTML=kinds.map(([k,l])=>`<span class="chip ${KIND===k?"on":""}" data-k="${k}">${l}</span>`).join("");
+  const pool=DATA.filter(x=>KIND==="all"||x.kind===KIND);
+  const cnt={};pool.forEach(x=>{const b=bucket(x.diam);cnt[b]=(cnt[b]||0)+1});
+  const keys=Object.keys(cnt).sort((a,b)=>(a==="?")-(b==="?")||a-b);
+  $("sizes").innerHTML=keys.map(k=>`<span class="chip ${SIZES.has(k)?"on":""}" data-s="${k}">${k==="?"?"без размера":k+" см"} · ${cnt[k]}</span>`).join("");
+}
+$("kinds").addEventListener("click",e=>{const c=e.target.closest(".chip");if(!c)return;KIND=c.dataset.k;SIZES.clear();SHOW=40;renderChips();renderCat()});
+$("sizes").addEventListener("click",e=>{const c=e.target.closest(".chip");if(!c)return;const s=c.dataset.s;SIZES.has(s)?SIZES.delete(s):SIZES.add(s);SHOW=40;renderChips();renderCat()});
+
+function filtered(){
+  const q=$("q").value.trim().toLowerCase(),pmin=+$("pmin").value||0,pmax=+$("pmax").value||Infinity;
+  let a=DATA.filter(x=>(KIND==="all"||x.kind===KIND)&&(!SIZES.size||SIZES.has(bucket(x.diam)))&&x.price>=pmin&&x.price<=pmax&&
+    (!q||(x.title+" "+(x.brand||"")+" "+(x.socket||"")).toLowerCase().includes(q))&&(!$("onlynew").checked||isNew(x))&&(!$("onlydrop").checked||isDrop(x)));
+  const s=$("sort").value;
+  if(s==="price")a.sort((x,y)=>x.price-y.price);
+  else if(s==="new")a.sort((x,y)=>(y.first_seen||"").localeCompare(x.first_seen||"")||x.price-y.price);
+  else if(s==="drop")a.sort((x,y)=>((y.prev_price||0)-y.price)-((x.prev_price||0)-x.price)||x.price-y.price);
+  else a.sort((x,y)=>(y.diam||0)-(x.diam||0)||x.price-y.price);
+  return a;
+}
+function card(x,extra){
+  const fav=!!FAV[x.id];
+  const old=isDrop(x)?`<span class="old">${fmt(x.prev_price)}</span>`:"";
+  return `<div class="card" data-id="${x.id}">
+    <div class="row">${x.images&&x.images[0]?`<img src="${esc(x.images[0])}" loading="lazy" alt="">`:""}
+      <div><div class="t">${esc(x.title)}</div><div class="price">${fmt(x.price)}${old}</div>${extra||""}</div></div>
+    <div class="badges">
+      ${x.diam?`<span class="b d">⌀ ${x.diam} см</span>`:""}
+      ${x.height&&x.kind==="sconce"?`<span class="b">выс. ${x.height} см</span>`:""}
+      ${x.lamps?`<span class="b">💡 ${x.lamps} ламп</span>`:""}
+      ${x.socket?`<span class="b">${esc(x.socket)}</span>`:""}
+      ${x.rating?`<span class="b">★ ${x.rating}</span>`:""}
+      <span class="b">${KINDS[x.kind]||""}</span>
+      ${isNew(x)?'<span class="b new">🆕 новая</span>':""}
+      ${isDrop(x)?`<span class="b dn">↓ −${fmt(x.prev_price-x.price)}</span>`:""}
+      ${x.prev_price&&x.price>x.prev_price?`<span class="b up">↑ +${fmt(x.price-x.prev_price)}</span>`:""}
+    </div>
+    <div class="btns">
+      <a class="btn" href="${esc(x.url)}" target="_blank" rel="noopener">Открыть в Kaspi</a>
+      <button class="btn" data-act="sim">Найти такую же</button>
+      <button class="btn star" data-act="fav">${fav?"★ в избранном":"☆ в избранное"}</button>
+    </div>
+  </div>`;
+}
+function renderCat(){
+  const a=filtered();
+  $("count").textContent=DATA.length?`Показано: ${Math.min(a.length,SHOW)} из ${a.length} (всего в базе ${DATA.length})`:"";
+  $("list").innerHTML=a.length?a.slice(0,SHOW).map(x=>card(x)).join("")+(a.length>SHOW?`<button class="btn more" data-act="more">Показать ещё</button>`:""):'<div class="empty">Ничего не найдено</div>';
+}
+["q","pmin","pmax","sort","onlynew","onlydrop"].forEach(id=>$(id).addEventListener("input",()=>{SHOW=40;renderCat()}));
+
+/* ---------- избранное ---------- */
+function toggleFav(id){
+  if(FAV[id])delete FAV[id];
+  else{const x=BY[id];if(!x)return;FAV[id]={p:x.price,t:x.title,u:x.url,i:x.images&&x.images[0]||"",d:META.date||""}}
+  save("kl_fav",FAV);$("favn").textContent=Object.keys(FAV).length;
+}
+function renderFav(){
+  $("favn").textContent=Object.keys(FAV).length;
+  const ids=Object.keys(FAV);
+  if(!ids.length){$("flist").innerHTML='<div class="empty">Пока пусто. Нажми «☆ в избранное» на карточке. Здесь будет видно, как изменилась цена с момента добавления.</div>';return}
+  const rows=ids.map(id=>({id,f:FAV[id],x:BY[id]})).sort((a,b)=>((a.x?a.x.price-a.f.p:0)-(b.x?b.x.price-b.f.p:0)));
+  $("flist").innerHTML=rows.map(({id,f,x})=>{
+    if(!x)return `<div class="card" data-id="${id}"><div class="row">${f.i?`<img src="${esc(f.i)}" alt="">`:""}<div><div class="t">${esc(f.t)}</div><div class="price">${fmt(f.p)}</div><div class="delta eq">нет в последней выгрузке (мог закончиться или подорожать выше лимита)</div></div></div><div class="btns"><a class="btn" href="${esc(f.u)}" target="_blank" rel="noopener">Открыть в Kaspi</a><button class="btn star" data-act="fav">★ убрать</button></div></div>`;
+    const dl=x.price-f.p;
+    const txt=dl<0?`↓ подешевела на ${fmt(-dl)} (была ${fmt(f.p)})`:dl>0?`↑ подорожала на ${fmt(dl)} (была ${fmt(f.p)})`:`цена та же, что при добавлении`;
+    return card(x,`<div class="delta ${dl<0?"ok":dl>0?"bad":"eq"}">${txt}</div>`);
+  }).join("");
+}
+
+/* ---------- найти такую же ---------- */
+function words(h){const w=[];for(let i=0;i<h.length;i+=8)w.push(parseInt(h.slice(i,i+8),16)>>>0);return w}
+function pc(v){v=v-((v>>>1)&0x55555555);v=(v&0x33333333)+((v>>>2)&0x33333333);return Math.imul((v+(v>>>4))&0x0f0f0f0f,0x01010101)>>>24}
+function dist(a,b){let best=Infinity;for(const wa of a._w)for(const wb of b._w){let s=0;for(let i=0;i<wa.length&&s<best;i++)s+=pc((wa[i]^wb[i])>>>0);if(s<best)best=s}return best}
+const STOP=new Set(["люстра","люстры","подвесная","потолочная","светильник","шт","кол","во","ламп","лампа","для","и","с","на","бра","настенное"]);
+function toks(t){return new Set(String(t).toLowerCase().replace(/[^a-zа-яё0-9]+/g," ").split(" ").filter(w=>w.length>1&&!/^\d+$/.test(w)&&!STOP.has(w)))}
+function jac(a,b){if(!a.size||!b.size)return 0;let i=0;a.forEach(w=>{if(b.has(w))i++});return i/(a.size+b.size-i)}
+function parseId(s){
+  s=(s||"").trim();if(/^\d{5,}$/.test(s))return s;
+  const m=s.match(/-(\d{5,})\/?(?:[?#]|$)/)||s.match(/(\d{6,})/);return m?m[1]:null;
+}
+function findSimilar(id){
+  REFID=id;MSIZES.clear();MSHOW=40;
+  const ref=BY[id];
+  if(!ref){MRES=[];return}
+  const thr=+$("thr").value,rt=toks(ref.title),out=[];
+  for(const x of DATA){
+    if(x.id===id||x.kind!==ref.kind)continue;
+    const d=(ref._w.length&&x._w.length)?dist(ref,x):Infinity;
+    const t=jac(rt,toks(x.title));
+    const score=d-(t>=0.6?10:0);
+    if(score<=thr)out.push({x,d,t});
   }
-  e.target.value = '';
+  out.sort((a,b)=>a.x.price-b.x.price);
+  MRES=out;
+}
+function renderMatch(msg){
+  const box=$("mres");
+  if(msg){box.innerHTML=`<div class="note">${msg}</div>`;$("msizes").innerHTML="";return}
+  const ref=BY[REFID];if(!ref){box.innerHTML="";return}
+  if(!ref._w.length)return void(box.innerHTML=card(ref)+'<div class="note">У эталона нет хэша фото (картинка не скачалась при парсинге). Сравнение по фото невозможно, обнови базу.</div>');
+  const cnt={};MRES.forEach(r=>{const b=bucket(r.x.diam);cnt[b]=(cnt[b]||0)+1});
+  const keys=Object.keys(cnt).sort((a,b)=>(a==="?")-(b==="?")||a-b);
+  $("msizes").innerHTML=keys.map(k=>`<span class="chip ${MSIZES.has(k)?"on":""}" data-s="${k}">${k==="?"?"без размера":k+" см"} · ${cnt[k]}</span>`).join("");
+  const list=MRES.filter(r=>!MSIZES.size||MSIZES.has(bucket(r.x.diam)));
+  const cheaper=list.filter(r=>r.x.price<ref.price).length;
+  let h=`<div class="sec">Эталон</div><div class="ref">${card(ref)}</div>
+    <div class="sec">Найдено: ${list.length}${cheaper?` · дешевле эталона: ${cheaper}`:""}</div>`;
+  if(!list.length)h+='<div class="note">Похожих не нашлось. Попробуй режим «Похожий вид (широко)».</div>';
+  h+=list.slice(0,MSHOW).map(r=>{
+    const dl=r.x.price-ref.price;
+    const dtxt=dl<0?`дешевле эталона на ${fmt(-dl)}`:dl>0?`дороже эталона на ${fmt(dl)}`:"цена как у эталона";
+    const same=r.d<=20?"то же фото":r.d<=55?"та же модель":"похожий вид";
+    const sz=(ref.diam&&r.x.diam&&Math.abs(ref.diam-r.x.diam)>=5)?` · другой размер (${r.x.diam} см)`:"";
+    return card(r.x,`<div class="delta ${dl<0?"ok":dl>0?"bad":"eq"}">${dtxt}</div><div class="sub">${same}${sz}</div>`);
+  }).join("");
+  if(list.length>MSHOW)h+='<button class="btn more" data-act="mmore">Показать ещё</button>';
+  box.innerHTML=h;
+}
+function runMatch(){
+  const id=parseId($("refin").value);
+  if(!id)return renderMatch("Не нашёл номер товара в ссылке. Нужна ссылка вида <b>kaspi.kz/shop/p/…-123456789/</b>.");
+  if(!BY[id]){REFID=null;MRES=[];return renderMatch(`Карточки <b>${id}</b> нет в базе: она дороже лимита, из другой категории или ещё не попала в выгрузку. Запусти парсинг (Actions → parse-kaspi → Run workflow) и вставь эту ссылку в поле <b>ref_url</b>, тогда она добавится как эталон.`)}
+  findSimilar(id);renderMatch();
+}
+$("go").addEventListener("click",runMatch);
+$("refin").addEventListener("keydown",e=>{if(e.key==="Enter")runMatch()});
+$("thr").addEventListener("change",()=>{if(REFID){findSimilar(REFID);renderMatch()}});
+$("msizes").addEventListener("click",e=>{const c=e.target.closest(".chip");if(!c)return;const s=c.dataset.s;MSIZES.has(s)?MSIZES.delete(s):MSIZES.add(s);renderMatch()});
+
+/* ---------- общие клики по карточкам ---------- */
+document.addEventListener("click",e=>{
+  const b=e.target.closest("[data-act]");if(!b)return;
+  const act=b.dataset.act,c=b.closest(".card"),id=c&&c.dataset.id;
+  if(act==="fav"){toggleFav(id);renderCat();renderFav();if(REFID)renderMatch()}
+  else if(act==="sim"){const x=BY[id];if(x){$("refin").value=x.url;findSimilar(id);setTab("match");renderMatch()}}
+  else if(act==="more"){SHOW+=40;renderCat()}
+  else if(act==="mmore"){MSHOW+=40;renderMatch()}
 });
-
-// === ДЕМО ===
-const DEMO = {"lastDate":{"y":2026,"m":4,"d":19},
-"daily":{"qn_tov":{"янв":[5601,5604,5614,5624,5631,5634,5636,5641,5648,5653,5660,5662,5662,5656,5652,5653,5654,5655,5656,5657,5658,5659,5660,5661,5662,5663,5664,5665,5666,5667,5668],"фев":[5625,5620,5628,5673,5674,5672,5671,5673,5670,5672,5671,5674,5677,5673,5675,5673,5674,5672,5670,5671,5673,5675,5672,5670,5668,5666,5664,5662,null,null,null],"мар":[5678,5678,5611,5117,4850,5022,4652,5001,5545,5503,5569,5690,5580,5509,5480,5521,5510,5500,5495,5490,5485,5480,5478,5475,5472,5470,5468,5466,5464,5462,5460],"апр":[5720,5602,5487,5485,5500,5535,5582,5584,5579,5582,5412,5580,5578,5580,5396,5578,5580,5582,5584,5586,5588,5590,5592,5594,5596,5598,5600,5602,5604,5606,null],"май":[5659,5500,5581,5554,5500,5570,5601,5522,5520,5597,5698,5458,5400,5536,5520,5508,5502,5469,5550,null,null,null,null,null,null,null,null,null,null,null,null]},
-"qn_fact":{"май":[5689.6,5529.7,5611.2,5584,5529.7,5600.1,5631.3,5551.8,5549.8,5627.3,5728.8,5487.5,5429.2,5565.9,5549.8,5567.8,5532,5499,5580,null,null,null,null,null,null,null,null,null,null,null,null]},
-"loss":{"май":[30.6,29.7,30.2,30,29.7,30.1,30.3,29.8,29.8,30.3,30.8,29.5,29.2,29.9,29.8,29.8,30,29.5,30,null,null,null,null,null,null,null,null,null,null,null,null]},
-"sdacha":{"май":[5631,5650,3500,5400,5550,3200,5500,5600,3300,5520,5650,3100,5400,5550,3250,5500,3400,5450,3821,null,null,null,null,null,null,null,null,null,null,null,null]},
-"park":{"май":[35200,35080,37160,37320,37270,39640,39740,39660,41880,41960,41960,44510,44530,44520,46790,46800,49050,49070,38486,null,null,null,null,null,null,null,null,null,null,null,null]},
-"dns_in":{"май":[44500,43200,42800,43100,42500,43000,42900,42700,42600,42800,43400,42100,41700,42300,42100,42000,41800,41600,41947,null,null,null,null,null,null,null,null,null,null,null,null]},
-"obv":{"май":[85.1,85.3,85.2,85.4,85.5,85.3,85.2,85.3,85.4,85.3,85.1,85.5,85.6,85.4,85.5,85.4,85.4,85.3,85.3,null,null,null,null,null,null,null,null,null,null,null,null]}},
-"monthly":{"dob":[175708,159558,169346,166681,105814,0,0,0,0,0,0,0],"sd":[174703,151073,171009,160974,88888,0,0,0,0,0,0,0],"bit":[0,0,45287,104359,42655,0,0,0,0,0,0,0],"zh":[2393388,2159810,2393887,2326093,1473712,0,0,0,0,0,0,0],"park":[12204,12264,19891,17318,22129,0,0,0,0,0,0,0],"pg3":[356369,322587,353035,337815,212571,0,0,0,0,0,0,0],"mpgu":[32620,29416,32667,31448,19992,0,0,0,0,0,0,0],"spgu":[147685,132312,140838,125819,87126,0,0,0,0,0,0,0],"par":[536674,484315,526540,495082,319689,0,0,0,0,0,0,0],"zak_int":[941392,848289,930446.5,902987,556100,0,0,0,0,0,0,0],"zak_ext_sum":[1171090,1084780,1223790,1215500,761620,0,0,0,0,0,0,0],"vlz":[206940,178420,211690,168300,120760,0,0,0,0,0,0,0],"gaz":[38798461,34813750,38151265,35700393,22742293,0,0,0,0,0,0,0],"ozpv":[406060,367538,379452,393300,248770,0,0,0,0,0,0,0]},
-"fund":{"flow":24,"pump":3292,"total":3316,"inFlow":16,"inPump":255,"injSteamA":367,"injWaterA":599,"injTotalA":966}};
-
-// === СТАРТ ===
-(function(){
-  const cached = load();
-  if(cached){
-    render(cached);
-    $('srcInfo').textContent='Кэш · '+new Date().toLocaleString('ru-RU');
-  } else {
-    loadDemo();
-  }
-})();
+init();
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script>
 </body>
 </html>
