@@ -14,6 +14,14 @@ on:
         description: "Цена до, ₸"
         required: false
         default: "100000"
+      mode:
+        description: "resume = дозагрузить недостающее (быстро, список не обходим); full = обойти весь список заново (долго, обновит цены)"
+        required: false
+        type: choice
+        default: "resume"
+        options:
+          - resume
+          - full
 permissions:
   contents: write
 concurrency:
@@ -28,12 +36,14 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq tesseract-ocr tesseract-ocr-rus
       - run: pip install pillow
       - run: python3 scripts/parse.py > parse-out.txt 2>&1 || echo "FAILED" >> parse-out.txt
         env:
           ROOM: ${{ github.event.inputs.room }}
           PRICE_MIN: ${{ github.event.inputs.price_min }}
           PRICE_MAX: ${{ github.event.inputs.price_max }}
+          MODE: ${{ github.event.inputs.mode }}
       - run: |
           git config user.name "github-actions"
           git config user.email "actions@users.noreply.github.com"

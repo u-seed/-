@@ -69,7 +69,7 @@ h1{font-size:19px;margin:0}
   <div class="chips" id="kinds"></div>
   <div class="chips" id="sizes"></div>
   <div class="ctrl">
-    <input class="full" id="q" placeholder="Поиск: название, бренд, цоколь" autocomplete="off">
+    <input class="full" id="q" placeholder="Поиск: название, бренд, код модели (например 1888-800)" autocomplete="off">
     <input id="pmin" type="number" inputmode="numeric" placeholder="Цена от">
     <input id="pmax" type="number" inputmode="numeric" placeholder="Цена до" value="100000">
     <select class="full" id="sort">
@@ -88,12 +88,12 @@ h1{font-size:19px;margin:0}
 </div>
 
 <div class="panel" id="p-match">
-  <div class="note">Вставь ссылку на карточку Kaspi (эталон). Покажу такие же и похожие по фото, от дешёвых к дорогим. Работает по люстрам из нашей базы.</div>
+  <div class="note">Вставь ссылку на карточку Kaspi (эталон). Покажу ту же модель в других размерах (по коду в ссылке) и такие же или похожие по фото, от дешёвых к дорогим. Работает по нашей базе.</div>
   <div class="find"><input class="inp" id="refin" placeholder="https://kaspi.kz/shop/p/…" autocomplete="off"><button class="btn" id="go">Найти</button></div>
   <div class="ctrl">
     <select class="full" id="thr">
       <option value="25">Только то же фото (строго)</option>
-      <option value="55" selected>Такая же модель (средне)</option>
+      <option value="55" selected>Такая же модель по фото (средне)</option>
       <option value="85">Похожий вид (широко)</option>
     </select>
   </div>
@@ -110,6 +110,7 @@ const fmt=n=>Number(n).toLocaleString("ru-RU")+" ₸";
 const load=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}};
 const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
 const KINDS={chandelier:"Люстры",sconce:"Бра"};
+const SRC={spec:"из характеристик карточки",photo:"прочитано с фото",model:"из кода модели",dims:"приблизительно: длина = ширина",name:"приблизительно: из названия"};
 let DATA=[],META={},BY={},FAV=load("kl_fav",{}),KIND="all",SIZES=new Set(),MSIZES=new Set(),SHOW=40,REFID=null,MSHOW=40,MRES=[];
 
 /* ---------- данные ---------- */
@@ -121,8 +122,8 @@ async function init(){
     const r=await fetch("data.json?"+Date.now(),{cache:"no-store"});
     const d=await r.json();
     META=d;DATA=d.items||[];BY={};DATA.forEach(x=>{BY[x.id]=x;x._w=(x.dh||[]).filter(Boolean).map(words)});
-    const pend=DATA.length-(d.with_specs==null?DATA.length:d.with_specs);
-    $("meta").textContent=DATA.length?`Обновлено ${d.generated} · в базе ${DATA.length} (люстр ${d.kinds?d.kinds.chandelier:0}, бра ${d.kinds?d.kinds.sconce:0})`+(pend>0?` · размеры загружены не у всех (${pend} без характеристик): запусти парсер ещё раз`:""):"База пуста: запусти парсинг (Actions → parse-kaspi → Run workflow)";
+    const known=DATA.filter(x=>x.diam).length,toRead=DATA.filter(x=>x.kind==="chandelier"&&!x.diam&&!x.ocr).length;
+    $("meta").textContent=DATA.length?`Обновлено ${d.generated} · в базе ${DATA.length} (люстр ${d.kinds?d.kinds.chandelier:0}, бра ${d.kinds?d.kinds.sconce:0}) · диаметр известен у ${known}`+(toRead>0?` · фото ещё не читали у ${toRead} люстр: запусти парсер (resume)`:""):"База пуста: запусти парсинг (Actions → parse-kaspi → Run workflow)";
   }catch(e){$("meta").textContent="Не удалось загрузить data.json"}
   renderChips();renderCat();renderFav();
 }
@@ -151,7 +152,7 @@ $("sizes").addEventListener("click",e=>{const c=e.target.closest(".chip");if(!c)
 function filtered(){
   const q=$("q").value.trim().toLowerCase(),pmin=+$("pmin").value||0,pmax=+$("pmax").value||Infinity;
   let a=DATA.filter(x=>(KIND==="all"||x.kind===KIND)&&(!SIZES.size||SIZES.has(bucket(x.diam)))&&x.price>=pmin&&x.price<=pmax&&
-    (!q||(x.title+" "+(x.brand||"")+" "+(x.socket||"")).toLowerCase().includes(q))&&(!$("onlynew").checked||isNew(x))&&(!$("onlydrop").checked||isDrop(x)));
+    (!q||(x.title+" "+(x.brand||"")+" "+(x.socket||"")+" "+(x.url||"").split("/p/")[1]).toLowerCase().includes(q))&&(!$("onlynew").checked||isNew(x))&&(!$("onlydrop").checked||isDrop(x)));
   const s=$("sort").value;
   if(s==="price")a.sort((x,y)=>x.price-y.price);
   else if(s==="new")a.sort((x,y)=>(y.first_seen||"").localeCompare(x.first_seen||"")||x.price-y.price);
@@ -166,7 +167,7 @@ function card(x,extra){
     <div class="row">${x.images&&x.images[0]?`<img src="${esc(x.images[0])}" loading="lazy" alt="">`:""}
       <div><div class="t">${esc(x.title)}</div><div class="price">${fmt(x.price)}${old}</div>${extra||""}</div></div>
     <div class="badges">
-      ${x.diam?`<span class="b d">⌀ ${x.diam} см</span>`:""}
+      ${x.diam?`<span class="b d" title="${esc(SRC[x.dsrc]||"")}">⌀ ${(x.dsrc==="dims"||x.dsrc==="name")?"≈":""}${x.diam} см${x.dsrc==="photo"?" 📷":""}</span>`:""}
       ${x.height&&x.kind==="sconce"?`<span class="b">выс. ${x.height} см</span>`:""}
       ${x.lamps?`<span class="b">💡 ${x.lamps} ламп</span>`:""}
       ${x.socket?`<span class="b">${esc(x.socket)}</span>`:""}
@@ -227,11 +228,13 @@ function findSimilar(id){
   if(!ref){MRES=[];return}
   const thr=+$("thr").value,rt=toks(ref.title),out=[];
   for(const x of DATA){
-    if(x.id===id||x.kind!==ref.kind)continue;
+    if(x.id===id)continue;
+    const fam=!!(ref.fam&&x.fam===ref.fam);   // та же модель по коду в ссылке (другой размер или цвет)
+    if(!fam&&x.kind!==ref.kind)continue;
     const d=(ref._w.length&&x._w.length)?dist(ref,x):Infinity;
     const t=jac(rt,toks(x.title));
     const score=d-(t>=0.6?10:0);
-    if(score<=thr)out.push({x,d,t});
+    if(fam||score<=thr)out.push({x,d,t,fam});
   }
   out.sort((a,b)=>a.x.price-b.x.price);
   MRES=out;
@@ -252,7 +255,7 @@ function renderMatch(msg){
   h+=list.slice(0,MSHOW).map(r=>{
     const dl=r.x.price-ref.price;
     const dtxt=dl<0?`дешевле эталона на ${fmt(-dl)}`:dl>0?`дороже эталона на ${fmt(dl)}`:"цена как у эталона";
-    const same=r.d<=20?"то же фото":r.d<=55?"та же модель":"похожий вид";
+    const same=r.fam?"та же модель (код в ссылке)":r.d<=20?"то же фото":r.d<=55?"та же модель по фото":"похожий вид";
     const sz=(ref.diam&&r.x.diam&&Math.abs(ref.diam-r.x.diam)>=5)?` · другой размер (${r.x.diam} см)`:"";
     return card(r.x,`<div class="delta ${dl<0?"ok":dl>0?"bad":"eq"}">${dtxt}</div><div class="sub">${same}${sz}</div>`);
   }).join("");
