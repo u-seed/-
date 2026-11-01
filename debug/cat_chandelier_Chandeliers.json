@@ -1,5 +1,5 @@
 {
- "total": 45252,
+ "total": 45464,
  "titles": [
   "Люстра подвесная FUR HOUSE E14, кол-во ламп: 1 шт",
   "Люстра потолочная FUR HOUSE GX53, кол-во ламп: 1 шт",
@@ -55,28 +55,87 @@
   {
    "id": "price",
    "rows": [
-    ":price:до 10 000 т",
-    ":price:10 000 - 49 999 т",
-    ":price:50 000 - 99 999 т",
-    ":price:100 000 - 149 999 т",
-    ":price:150 000 - 199 999 т",
-    ":price:200 000 - 499 999 т",
-    ":price:более 500 000 т"
+    [
+     ":price:до 10 000 т",
+     1948
+    ],
+    [
+     ":price:10 000 - 49 999 т",
+     19649
+    ],
+    [
+     ":price:50 000 - 99 999 т",
+     11050
+    ],
+    [
+     ":price:100 000 - 149 999 т",
+     4538
+    ],
+    [
+     ":price:150 000 - 199 999 т",
+     2835
+    ],
+    [
+     ":price:200 000 - 499 999 т",
+     4390
+    ],
+    [
+     ":price:более 500 000 т",
+     928
+    ]
    ]
   },
   {
    "id": "manufacturerName",
    "rows": [
-    ":manufacturerName:1001 ночь",
-    ":manufacturerName:21vek",
-    ":manufacturerName:21 ВЕК СВЕТ",
-    ":manufacturerName:3D PUZZLE",
-    ":manufacturerName:99",
-    ":manufacturerName:ABC",
-    ":manufacturerName:ABIS ",
-    ":manufacturerName:A Brand",
-    ":manufacturerName:ADA",
-    ":manufacturerName:ADEMI LUSTRA"
+    [
+     ":manufacturerName:1001 ночь",
+     17
+    ],
+    [
+     ":manufacturerName:21vek",
+     12
+    ],
+    [
+     ":manufacturerName:21 ВЕК СВЕТ",
+     23
+    ],
+    [
+     ":manufacturerName:3D PUZZLE",
+     743
+    ],
+    [
+     ":manufacturerName:99",
+     66
+    ],
+    [
+     ":manufacturerName:ABC",
+     223
+    ],
+    [
+     ":manufacturerName:ABIS ",
+     12
+    ],
+    [
+     ":manufacturerName:A Brand",
+     5
+    ],
+    [
+     ":manufacturerName:ADA",
+     491
+    ],
+    [
+     ":manufacturerName:ADEMI LUSTRA",
+     10
+    ],
+    [
+     ":manufacturerName:AINE Light",
+     6
+    ],
+    [
+     ":manufacturerName:AISALIS",
+     92
+    ]
    ]
   },
   {
@@ -86,27 +145,83 @@
   {
    "id": "Chandeliers*Room",
    "rows": [
-    ":Chandeliers*Room:ванная комната",
-    ":Chandeliers*Room:гостиная",
-    ":Chandeliers*Room:детская",
-    ":Chandeliers*Room:кухня",
-    ":Chandeliers*Room:лестничный проем",
-    ":Chandeliers*Room:спальня"
+    [
+     ":Chandeliers*Room:ванная комната",
+     33
+    ],
+    [
+     ":Chandeliers*Room:гостиная",
+     7328
+    ],
+    [
+     ":Chandeliers*Room:детская",
+     78
+    ],
+    [
+     ":Chandeliers*Room:кухня",
+     666
+    ],
+    [
+     ":Chandeliers*Room:лестничный проем",
+     66
+    ],
+    [
+     ":Chandeliers*Room:спальня",
+     1570
+    ]
    ]
   },
   {
    "id": "Chandeliers*Colour",
    "rows": [
-    ":Chandeliers*Colour:бежевый",
-    ":Chandeliers*Colour:белый",
-    ":Chandeliers*Colour:бирюзовый",
-    ":Chandeliers*Colour:бордовый",
-    ":Chandeliers*Colour:бронза",
-    ":Chandeliers*Colour:голубой",
-    ":Chandeliers*Colour:желтый",
-    ":Chandeliers*Colour:зеленый",
-    ":Chandeliers*Colour:золотистый",
-    ":Chandeliers*Colour:коричневый"
+    [
+     ":Chandeliers*Colour:бежевый",
+     1433
+    ],
+    [
+     ":Chandeliers*Colour:белый",
+     15109
+    ],
+    [
+     ":Chandeliers*Colour:бирюзовый",
+     21
+    ],
+    [
+     ":Chandeliers*Colour:бордовый",
+     11
+    ],
+    [
+     ":Chandeliers*Colour:бронза",
+     1054
+    ],
+    [
+     ":Chandeliers*Colour:голубой",
+     129
+    ],
+    [
+     ":Chandeliers*Colour:желтый",
+     334
+    ],
+    [
+     ":Chandeliers*Colour:зеленый",
+     321
+    ],
+    [
+     ":Chandeliers*Colour:золотистый",
+     9468
+    ],
+    [
+     ":Chandeliers*Colour:коричневый",
+     1450
+    ],
+    [
+     ":Chandeliers*Colour:красный",
+     210
+    ],
+    [
+     ":Chandeliers*Colour:латунь",
+     3669
+    ]
    ]
   },
   {
@@ -116,86 +231,283 @@
   {
    "id": "Chandeliers*Installation",
    "rows": [
-    ":Chandeliers*Installation:люстра вентилятор",
-    ":Chandeliers*Installation:люстра каскадная",
-    ":Chandeliers*Installation:люстра на штанге",
-    ":Chandeliers*Installation:люстра подвесная",
-    ":Chandeliers*Installation:люстра потолочная",
-    ":Chandeliers*Installation:накладной"
+    [
+     ":Chandeliers*Installation:люстра вентилятор",
+     104
+    ],
+    [
+     ":Chandeliers*Installation:люстра каскадная",
+     281
+    ],
+    [
+     ":Chandeliers*Installation:люстра на штанге",
+     888
+    ],
+    [
+     ":Chandeliers*Installation:люстра подвесная",
+     23568
+    ],
+    [
+     ":Chandeliers*Installation:люстра потолочная",
+     20394
+    ],
+    [
+     ":Chandeliers*Installation:накладной",
+     193
+    ]
    ]
   },
   {
    "id": "Chandeliers*Shade material",
    "rows": [
-    ":Chandeliers*Shade material:акрил",
-    ":Chandeliers*Shade material:алебастр",
-    ":Chandeliers*Shade material:алюминий",
-    ":Chandeliers*Shade material:бамбук",
-    ":Chandeliers*Shade material:без плафона",
-    ":Chandeliers*Shade material:бетон",
-    ":Chandeliers*Shade material:бумага",
-    ":Chandeliers*Shade material:войлок",
-    ":Chandeliers*Shade material:гипс",
-    ":Chandeliers*Shade material:дерево"
+    [
+     ":Chandeliers*Shade material:акрил",
+     7279
+    ],
+    [
+     ":Chandeliers*Shade material:алебастр",
+     12
+    ],
+    [
+     ":Chandeliers*Shade material:алюминий",
+     589
+    ],
+    [
+     ":Chandeliers*Shade material:бамбук",
+     63
+    ],
+    [
+     ":Chandeliers*Shade material:без плафона",
+     3259
+    ],
+    [
+     ":Chandeliers*Shade material:бетон",
+     64
+    ],
+    [
+     ":Chandeliers*Shade material:бумага",
+     54
+    ],
+    [
+     ":Chandeliers*Shade material:войлок",
+     18
+    ],
+    [
+     ":Chandeliers*Shade material:гипс",
+     150
+    ],
+    [
+     ":Chandeliers*Shade material:дерево",
+     1626
+    ],
+    [
+     ":Chandeliers*Shade material:искусственный мрамор",
+     47
+    ],
+    [
+     ":Chandeliers*Shade material:камень",
+     92
+    ]
    ]
   },
   {
    "id": "Chandeliers*Base type",
    "rows": [
-    ":Chandeliers*Base type:E12",
-    ":Chandeliers*Base type:E14",
-    ":Chandeliers*Base type:E17",
-    ":Chandeliers*Base type:E26",
-    ":Chandeliers*Base type:E27",
-    ":Chandeliers*Base type:E40",
-    ":Chandeliers*Base type:G13",
-    ":Chandeliers*Base type:G23",
-    ":Chandeliers*Base type:G4",
-    ":Chandeliers*Base type:G53"
+    [
+     ":Chandeliers*Base type:E12",
+     14
+    ],
+    [
+     ":Chandeliers*Base type:E14",
+     8100
+    ],
+    [
+     ":Chandeliers*Base type:E17",
+     6
+    ],
+    [
+     ":Chandeliers*Base type:E26",
+     7
+    ],
+    [
+     ":Chandeliers*Base type:E27",
+     11609
+    ],
+    [
+     ":Chandeliers*Base type:E40",
+     60
+    ],
+    [
+     ":Chandeliers*Base type:G13",
+     7
+    ],
+    [
+     ":Chandeliers*Base type:G23",
+     8
+    ],
+    [
+     ":Chandeliers*Base type:G4",
+     687
+    ],
+    [
+     ":Chandeliers*Base type:G53",
+     5
+    ],
+    [
+     ":Chandeliers*Base type:G9",
+     1554
+    ],
+    [
+     ":Chandeliers*Base type:GU10",
+     740
+    ]
    ]
   },
   {
    "id": "Chandeliers*Features",
    "rows": [
-    ":Chandeliers*Features:изменение цветовой температуры",
-    ":Chandeliers*Features:многоцветность",
-    ":Chandeliers*Features:поворотный патрон",
-    ":Chandeliers*Features:подключение к системе умного дома",
-    ":Chandeliers*Features:пульт ДУ",
-    ":Chandeliers*Features:пылевлагозащита",
-    ":Chandeliers*Features:регулировка по высоте",
-    ":Chandeliers*Features:регулировка яркости (диммируемая)",
-    ":Chandeliers*Features:управление со смартфона"
+    [
+     ":Chandeliers*Features:изменение цветовой температуры",
+     286
+    ],
+    [
+     ":Chandeliers*Features:многоцветность",
+     51
+    ],
+    [
+     ":Chandeliers*Features:поворотный патрон",
+     27
+    ],
+    [
+     ":Chandeliers*Features:подключение к системе умного дома",
+     12
+    ],
+    [
+     ":Chandeliers*Features:пульт ДУ",
+     1068
+    ],
+    [
+     ":Chandeliers*Features:пылевлагозащита",
+     4755
+    ],
+    [
+     ":Chandeliers*Features:регулировка по высоте",
+     5503
+    ],
+    [
+     ":Chandeliers*Features:регулировка яркости (диммируемая)",
+     1217
+    ],
+    [
+     ":Chandeliers*Features:управление со смартфона",
+     6
+    ]
    ]
   },
   {
    "id": "Chandeliers*Voltage",
    "rows": [
-    ":Chandeliers*Voltage:120-240В",
-    ":Chandeliers*Voltage:160-260В",
-    ":Chandeliers*Voltage:165-265В",
-    ":Chandeliers*Voltage:170-260В",
-    ":Chandeliers*Voltage:170-265В",
-    ":Chandeliers*Voltage:180-240В",
-    ":Chandeliers*Voltage:220-230В",
-    ":Chandeliers*Voltage:220-240В",
-    ":Chandeliers*Voltage:220-250В",
-    ":Chandeliers*Voltage:220В"
+    [
+     ":Chandeliers*Voltage:120-240В",
+     14
+    ],
+    [
+     ":Chandeliers*Voltage:160-260В",
+     92
+    ],
+    [
+     ":Chandeliers*Voltage:165-265В",
+     124
+    ],
+    [
+     ":Chandeliers*Voltage:170-260В",
+     569
+    ],
+    [
+     ":Chandeliers*Voltage:170-265В",
+     121
+    ],
+    [
+     ":Chandeliers*Voltage:180-240В",
+     748
+    ],
+    [
+     ":Chandeliers*Voltage:220-230В",
+     3231
+    ],
+    [
+     ":Chandeliers*Voltage:220-240В",
+     9875
+    ],
+    [
+     ":Chandeliers*Voltage:220-250В",
+     36
+    ],
+    [
+     ":Chandeliers*Voltage:220В",
+     29107
+    ],
+    [
+     ":Chandeliers*Voltage:230В",
+     1034
+    ],
+    [
+     ":Chandeliers*Voltage:6В",
+     1
+    ]
    ]
   },
   {
    "id": "allMerchants",
    "rows": [
-    ":allMerchants:18194006",
-    ":allMerchants:30447206",
-    ":allMerchants:12Mesyacev",
-    ":allMerchants:30432380",
-    ":allMerchants:30482922",
-    ":allMerchants:30335568",
-    ":allMerchants:30457883",
-    ":allMerchants:30202640",
-    ":allMerchants:30318527",
-    ":allMerchants:30368657"
+    [
+     ":allMerchants:18194006",
+     235
+    ],
+    [
+     ":allMerchants:30447206",
+     527
+    ],
+    [
+     ":allMerchants:12Mesyacev",
+     35
+    ],
+    [
+     ":allMerchants:30432380",
+     327
+    ],
+    [
+     ":allMerchants:30482922",
+     109
+    ],
+    [
+     ":allMerchants:30335568",
+     820
+    ],
+    [
+     ":allMerchants:30457883",
+     23
+    ],
+    [
+     ":allMerchants:30202640",
+     29
+    ],
+    [
+     ":allMerchants:30318527",
+     313
+    ],
+    [
+     ":allMerchants:30368657",
+     20
+    ],
+    [
+     ":allMerchants:30459469",
+     63
+    ],
+    [
+     ":allMerchants:4226000",
+     154
+    ]
    ]
   }
  ]

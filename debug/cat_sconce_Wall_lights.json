@@ -1,5 +1,5 @@
 {
- "total": 13539,
+ "total": 13559,
  "titles": [
   "Бра потолочный GX53, белый",
   "Бра настенный LED, белый",
@@ -54,85 +54,256 @@
   {
    "id": "price",
    "rows": [
-    ":price:до 10 000 т",
-    ":price:10 000 - 49 999 т",
-    ":price:50 000 - 99 999 т",
-    ":price:100 000 - 149 999 т",
-    ":price:150 000 - 199 999 т",
-    ":price:200 000 - 499 999 т",
-    ":price:более 500 000 т"
+    [
+     ":price:до 10 000 т",
+     1923
+    ],
+    [
+     ":price:10 000 - 49 999 т",
+     8583
+    ],
+    [
+     ":price:50 000 - 99 999 т",
+     2163
+    ],
+    [
+     ":price:100 000 - 149 999 т",
+     557
+    ],
+    [
+     ":price:150 000 - 199 999 т",
+     181
+    ],
+    [
+     ":price:200 000 - 499 999 т",
+     108
+    ],
+    [
+     ":price:более 500 000 т",
+     10
+    ]
    ]
   },
   {
    "id": "manufacturerName",
    "rows": [
-    ":manufacturerName:100 Картин",
-    ":manufacturerName:3D PUZZLE",
-    ":manufacturerName:AAT",
-    ":manufacturerName:ABC",
-    ":manufacturerName:ABS",
-    ":manufacturerName:ADA",
-    ":manufacturerName:ADIME",
-    ":manufacturerName:A-Elita",
-    ":manufacturerName:AGM",
-    ":manufacturerName:AISALIS"
+    [
+     ":manufacturerName:100 Картин",
+     4
+    ],
+    [
+     ":manufacturerName:3D PUZZLE",
+     524
+    ],
+    [
+     ":manufacturerName:AAT",
+     1
+    ],
+    [
+     ":manufacturerName:ABC",
+     17
+    ],
+    [
+     ":manufacturerName:ABS",
+     3
+    ],
+    [
+     ":manufacturerName:ADA",
+     11
+    ],
+    [
+     ":manufacturerName:ADIME",
+     10
+    ],
+    [
+     ":manufacturerName:A-Elita",
+     1
+    ],
+    [
+     ":manufacturerName:AGM",
+     2
+    ],
+    [
+     ":manufacturerName:AISALIS",
+     25
+    ],
+    [
+     ":manufacturerName:Akkord",
+     1
+    ],
+    [
+     ":manufacturerName:AKKO STAR",
+     2
+    ]
    ]
   },
   {
    "id": "Wall lights*Installation",
    "rows": [
-    ":Wall lights*Installation:накладной",
-    ":Wall lights*Installation:настенный",
-    ":Wall lights*Installation:платформа",
-    ":Wall lights*Installation:подвесной",
-    ":Wall lights*Installation:потолочный"
+    [
+     ":Wall lights*Installation:накладной",
+     2997
+    ],
+    [
+     ":Wall lights*Installation:настенный",
+     10755
+    ],
+    [
+     ":Wall lights*Installation:платформа",
+     35
+    ],
+    [
+     ":Wall lights*Installation:подвесной",
+     482
+    ],
+    [
+     ":Wall lights*Installation:потолочный",
+     208
+    ]
    ]
   },
   {
    "id": "Wall lights*Type of button",
    "rows": [
-    ":Wall lights*Type of button:датчик движения",
-    ":Wall lights*Type of button:механический",
-    ":Wall lights*Type of button:сенсорный",
-    ":Wall lights*Type of button:электронный"
+    [
+     ":Wall lights*Type of button:датчик движения",
+     1902
+    ],
+    [
+     ":Wall lights*Type of button:механический",
+     10822
+    ],
+    [
+     ":Wall lights*Type of button:сенсорный",
+     176
+    ],
+    [
+     ":Wall lights*Type of button:электронный",
+     1234
+    ]
    ]
   },
   {
    "id": "Wall lights*Purpose",
    "rows": [
-    ":Wall lights*Purpose:для влажных помещений",
-    ":Wall lights*Purpose:для жилых помещений",
-    ":Wall lights*Purpose:для уличного освещения"
+    [
+     ":Wall lights*Purpose:для влажных помещений",
+     2443
+    ],
+    [
+     ":Wall lights*Purpose:для жилых помещений",
+     11184
+    ],
+    [
+     ":Wall lights*Purpose:для уличного освещения",
+     357
+    ]
    ]
   },
   {
    "id": "Wall lights*Material",
    "rows": [
-    ":Wall lights*Material:агат",
-    ":Wall lights*Material:акрил",
-    ":Wall lights*Material:алебастр",
-    ":Wall lights*Material:алюминий",
-    ":Wall lights*Material:гипс",
-    ":Wall lights*Material:дерево",
-    ":Wall lights*Material:искусственный мрамор",
-    ":Wall lights*Material:камень",
-    ":Wall lights*Material:керамика",
-    ":Wall lights*Material:латунь"
+    [
+     ":Wall lights*Material:агат",
+     410
+    ],
+    [
+     ":Wall lights*Material:акрил",
+     1405
+    ],
+    [
+     ":Wall lights*Material:алебастр",
+     9
+    ],
+    [
+     ":Wall lights*Material:алюминий",
+     483
+    ],
+    [
+     ":Wall lights*Material:гипс",
+     94
+    ],
+    [
+     ":Wall lights*Material:дерево",
+     462
+    ],
+    [
+     ":Wall lights*Material:искусственный мрамор",
+     37
+    ],
+    [
+     ":Wall lights*Material:камень",
+     152
+    ],
+    [
+     ":Wall lights*Material:керамика",
+     344
+    ],
+    [
+     ":Wall lights*Material:латунь",
+     69
+    ],
+    [
+     ":Wall lights*Material:металл",
+     9670
+    ],
+    [
+     ":Wall lights*Material:мрамор",
+     526
+    ]
    ]
   },
   {
    "id": "allMerchants",
    "rows": [
-    ":allMerchants:30303017",
-    ":allMerchants:18194006",
-    ":allMerchants:30447206",
-    ":allMerchants:12Mesyacev",
-    ":allMerchants:30432380",
-    ":allMerchants:30482922",
-    ":allMerchants:30335568",
-    ":allMerchants:30457883",
-    ":allMerchants:30202640",
-    ":allMerchants:30318527"
+    [
+     ":allMerchants:30303017",
+     9
+    ],
+    [
+     ":allMerchants:18194006",
+     92
+    ],
+    [
+     ":allMerchants:30447206",
+     46
+    ],
+    [
+     ":allMerchants:12Mesyacev",
+     7
+    ],
+    [
+     ":allMerchants:30432380",
+     61
+    ],
+    [
+     ":allMerchants:30482922",
+     98
+    ],
+    [
+     ":allMerchants:30335568",
+     613
+    ],
+    [
+     ":allMerchants:30457883",
+     9
+    ],
+    [
+     ":allMerchants:30202640",
+     6
+    ],
+    [
+     ":allMerchants:30318527",
+     21
+    ],
+    [
+     ":allMerchants:30445929",
+     12
+    ],
+    [
+     ":allMerchants:30476798",
+     11
+    ]
    ]
   }
  ]
