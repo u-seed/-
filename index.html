@@ -218,6 +218,7 @@ function toks(t){return new Set(String(t).toLowerCase().replace(/[^a-zа-яё0-9
 function jac(a,b){if(!a.size||!b.size)return 0;let i=0;a.forEach(w=>{if(b.has(w))i++});return i/(a.size+b.size-i)}
 function parseId(s){
   s=(s||"").trim();if(/^\d{5,}$/.test(s))return s;
+  if(/l\.kaspi\.kz\//i.test(s)&&!/\/p\//.test(s))return "SHORT";
   const m=s.match(/-(\d{5,})\/?(?:[?#]|$)/)||s.match(/(\d{6,})/);return m?m[1]:null;
 }
 function findSimilar(id){
@@ -260,6 +261,7 @@ function renderMatch(msg){
 }
 function runMatch(){
   const id=parseId($("refin").value);
+  if(id==="SHORT")return renderMatch("Это короткая ссылка Kaspi (l.kaspi.kz): по ней приложение не узнаёт товар, цифры в ней случайные. Открой ссылку в браузере и скопируй адрес вида <b>kaspi.kz/shop/p/…-180601933/</b>, либо найди люстру в каталоге и нажми «Найти такую же» на её карточке.");
   if(!id)return renderMatch("Не нашёл номер товара в ссылке. Нужна ссылка вида <b>kaspi.kz/shop/p/…-123456789/</b>.");
   if(!BY[id]){REFID=null;MRES=[];return renderMatch(`Карточки <b>${id}</b> нет в базе: она не подошла под фильтры парсинга (цена, комната для люстр) или появилась позже. Запусти парсер (Actions → parse-kaspi → Run workflow), при необходимости расширь цену или поставь комнату «любая».`)}
   findSimilar(id);renderMatch();
