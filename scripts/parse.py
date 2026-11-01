@@ -31,7 +31,7 @@ WORKERS = int(env("WORKERS", "8"))
 MODE = env("MODE", "resume")                          # resume — не обходить список заново, если есть data.json; full — обойти заново
 T_ALL = float(env("TOTAL_MINUTES", "150")) * 60       # общий бюджет времени
 T_HASH = T_ALL * 0.45                                 # фото-хэши до 45% бюджета
-T_OCR = T_ALL * 0.80                                  # чтение надписей на фото до 80%, дальше характеристики
+T_SPEC_END = T_ALL * 0.80                             # характеристики до 80% бюджета, остальное — надписи на фото
 OCR_WORKERS = int(env("OCR_WORKERS", str((os.cpu_count() or 2) + 1)))
 HASH_IMAGES = int(env("HASH_IMAGES", "1"))
 MIN_ITEMS_OK = 5
@@ -443,7 +443,34 @@ else:
             save("промежуточно")
 save("после фото-хэшей")
 
-# ---------- 5. надписи на фото («Диаметр 80 см») ----------
+# ---------- 5. характеристики (самый результативный источник: у ~40% карточек длина = ширина = диаметр) ----------
+cur = build_items()
+nodiam = {i["id"] for i in cur if not i["diam"]}
+need = [c for c in raw if not (prev.get(c["id"]) and prev[c["id"]].get("specs") is not None)]
+need.sort(key=lambda c: (c["id"] not in nodiam, c.get("_kind") != "chandelier", c["unitPrice"] < 25000, c["unitPrice"]))
+log("характеристики: всего %d, из кэша %d, грузим %d" % (len(raw), len(raw) - len(need), len(need)))
+failed_total = 0
+for i in range(0, len(need), 200):
+    if time.time() - START > T_SPEC_END:
+        log("лимит времени на характеристики: осталось %d карточек — продолжу при следующем запуске" % (len(need) - i))
+        break
+    chunk = need[i:i + 200]
+    bad = 0
+    with ThreadPoolExecutor(max_workers=WORKERS) as ex:
+        for c, sp, err in ex.map(fetch_specs, chunk):
+            if sp is None:
+                bad += 1
+            else:
+                sp_map[c["id"]] = sp
+    failed_total += bad
+    log("  характеристики: %d / %d (ошибок в пачке %d)" % (min(i + 200, len(need)), len(need), bad))
+    if bad > len(chunk) * 0.5:
+        log("  много ошибок — вероятно ограничение скорости, пауза 60 с")
+        time.sleep(60)
+    if (i // 200) % 5 == 4:
+        save("промежуточно")
+log("характеристики не загрузились у %d карточек" % failed_total)
+# ---------- 6. надписи на фото («Диаметр 80 см»): дорогой этап с малой отдачей, поэтому только для оставшихся ----------
 OCR_ATTEMPTS = [(420, "11"), (760, "6")]
 OCR_FORMATS = [f for f in ([LFMT] if LFMT else []) + ["preview-large", "gallery-large", "gallery-medium", "preview-medium"] if f]
 ocr_stat = {"скачано": 0, "не скачалось": 0, "с диаметром": 0, "без надписи": 0}
@@ -491,11 +518,11 @@ if Image is None or not shutil.which("tesseract"):
 else:
     OCR_LANG = "rus+eng" if "rus" in subprocess.run(["tesseract", "--list-langs"], capture_output=True, text=True).stdout else "eng"
     cur = build_items()
-    todo = [i for i in cur if i["kind"] == "chandelier" and (not i["diam"] or i.get("dsrc") in D.APPROX) and not i.get("ocr") and i.get("images")]
+    todo = [i for i in cur if i["kind"] == "chandelier" and i["specs"] is not None and (not i["diam"] or i.get("dsrc") in D.APPROX) and not i.get("ocr") and i.get("images")]
     todo.sort(key=lambda i: i["price"])
     log("надписи на фото: нужно прочитать %d (форматы фото: %s, язык: %s, потоков %d)" % (len(todo), OCR_FORMATS[:3], OCR_LANG, OCR_WORKERS))
     for i in range(0, len(todo), 200):
-        if time.time() - START > T_OCR:
+        if time.time() - START > T_ALL:
             log("лимит времени на надписи: осталось %d — продолжу при следующем запуске" % (len(todo) - i))
             break
         with ThreadPoolExecutor(max_workers=OCR_WORKERS) as ex:
@@ -511,33 +538,6 @@ else:
             save("промежуточно")
     save("после надписей")
 
-# ---------- 6. характеристики (для тех, у кого диаметра всё ещё нет) ----------
-cur = build_items()
-nodiam = {i["id"] for i in cur if not i["diam"]}
-need = [c for c in raw if not (prev.get(c["id"]) and prev[c["id"]].get("specs") is not None)]
-need.sort(key=lambda c: (c["id"] not in nodiam, c["unitPrice"]))
-log("характеристики: всего %d, из кэша %d, грузим %d" % (len(raw), len(raw) - len(need), len(need)))
-failed_total = 0
-for i in range(0, len(need), 200):
-    if time.time() - START > T_ALL:
-        log("лимит времени на характеристики: осталось %d карточек — продолжу при следующем запуске" % (len(need) - i))
-        break
-    chunk = need[i:i + 200]
-    bad = 0
-    with ThreadPoolExecutor(max_workers=WORKERS) as ex:
-        for c, sp, err in ex.map(fetch_specs, chunk):
-            if sp is None:
-                bad += 1
-            else:
-                sp_map[c["id"]] = sp
-    failed_total += bad
-    log("  характеристики: %d / %d (ошибок в пачке %d)" % (min(i + 200, len(need)), len(need), bad))
-    if bad > len(chunk) * 0.5:
-        log("  много ошибок — вероятно ограничение скорости, пауза 60 с")
-        time.sleep(60)
-    if (i // 200) % 5 == 4:
-        save("промежуточно")
-log("характеристики не загрузились у %d карточек" % failed_total)
 items = save("итог")
 from collections import Counter
 log("источники диаметра: %s" % dict(Counter(i.get("dsrc") for i in items)))
