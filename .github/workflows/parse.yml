@@ -2,16 +2,27 @@ name: parse-kaspi
 on:
   workflow_dispatch:
     inputs:
-      ref_url:
-        description: "Ссылка на карточку-эталон Kaspi (необязательно, добавит её в базу)"
+      room:
+        description: "Люстры: комната в фильтре Kaspi (гостиная, спальня, кухня, детская… или «любая»)"
         required: false
-        default: ""
+        default: "гостиная"
+      price_min:
+        description: "Цена от, ₸"
+        required: false
+        default: "10000"
+      price_max:
+        description: "Цена до, ₸"
+        required: false
+        default: "100000"
 permissions:
   contents: write
+concurrency:
+  group: parse-kaspi
+  cancel-in-progress: false
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 170
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -20,7 +31,9 @@ jobs:
       - run: pip install pillow
       - run: python3 scripts/parse.py > parse-out.txt 2>&1 || echo "FAILED" >> parse-out.txt
         env:
-          REF_URL: ${{ github.event.inputs.ref_url }}
+          ROOM: ${{ github.event.inputs.room }}
+          PRICE_MIN: ${{ github.event.inputs.price_min }}
+          PRICE_MAX: ${{ github.event.inputs.price_max }}
       - run: |
           git config user.name "github-actions"
           git config user.email "actions@users.noreply.github.com"

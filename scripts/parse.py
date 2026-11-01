@@ -1,8 +1,9 @@
-"""Парсинг Kaspi Магазина: люстры и бра до PRICE_MAX ₸.
-Результат -> data.json (каталог + хэши фото для режима «Найти такую же»).
-Запуск: GitHub Actions (кнопка Run workflow) или по расписанию.
-Если категория не найдена автоматически, смотри parse-log.txt и папку debug/ — там что отвечает Kaspi."""
-import json, re, time, os, io, math, html as htmllib, urllib.request, urllib.parse, datetime
+"""Парсинг Kaspi Магазина: люстры и бра.
+Рабочая схема (как у телефонов): режем выдачу официальными фильтрами Kaspi (цена, комната, бренд…),
+чтобы каждый срез влез в лимит листания (300 страниц), затем тянем характеристики карточек.
+Прогресс сохраняется в data.json по ходу работы; повторный запуск продолжает с кэша.
+Настройки приходят из переменных окружения (в GitHub Actions — поля запуска)."""
+import json, re, time, os, io, html as htmllib, urllib.request, urllib.parse, urllib.error, datetime
 from concurrent.futures import ThreadPoolExecutor
 
 try:
@@ -10,28 +11,36 @@ try:
 except Exception:
     Image = None
 
+START = time.time()
+
+
+def env(name, default):
+    v = os.environ.get(name, "").strip()
+    return v if v else default
+
+
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
 BASE = "https://kaspi.kz"
-PRICE_MAX = 150000          # собираем с запасом, в приложении по умолчанию фильтр «до 100 000»
-MIN_ITEMS_OK = 30           # если собрали меньше — старый data.json не перезаписываем
-HASH_IMAGES = 2             # сколько фото на товар хэшируем
-TODAY = (datetime.datetime.utcnow() + datetime.timedelta(hours=5)).strftime("%Y-%m-%d")  # дата по Актау
+PRICE_MIN = int(env("PRICE_MIN", "10000"))
+PRICE_MAX = int(env("PRICE_MAX", "100000"))
+ROOM = env("ROOM", "гостиная")                       # для люстр; "любая" — без фильтра комнаты
+MAXPAGES = int(env("MAXPAGES", "300"))                # лимит листания Kaspi
+CAP = MAXPAGES * 12
+WORKERS = int(env("WORKERS", "8"))
+T_SPECS = float(env("SPECS_MINUTES", "100")) * 60     # до этой минуты тянем характеристики
+T_ALL = float(env("TOTAL_MINUTES", "135")) * 60       # до этой минуты хэшируем фото
+HASH_IMAGES = int(env("HASH_IMAGES", "1"))
+MIN_ITEMS_OK = 5
+TODAY = (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=5)).strftime("%Y-%m-%d")  # дата по Актау
 
 KINDS = {
-    "chandelier": {
-        "label": "Люстры",
-        "texts": ["люстра подвесная", "люстра потолочная"],
-        "codes": ["Chandeliers", "Chandelier", "Ceiling chandeliers", "Ceiling lights", "Pendant lights"],
-        "title_re": r"люстр|светильник|подвес",
-    },
-    "sconce": {
-        "label": "Бра",
-        "texts": ["бра настенное", "бра"],
-        "codes": ["Sconces", "Wall lamps", "Wall lights", "Wall sconces", "Sconce", "Wall light fixtures"],
-        "title_re": r"\bбра\b|настенн",
-    },
+    "chandelier": {"label": "Люстры", "codes": ["Chandeliers", "Chandelier", "Ceiling lights", "Pendant lights"],
+                   "title_re": r"люстр|светильник|подвес"},
+    "sconce": {"label": "Бра", "codes": ["Wall lights", "Sconces", "Wall lamps", "Wall sconces"],
+               "title_re": r"\bбра\b|настенн"},
 }
 BAD_TITLE = re.compile(r"^\s*(лампа|лампочка|светодиодная лампа|лента|подвес для|цоколь|абажур|плафон|патрон|провод|шнур|пульт)\b", re.I)
+SPLIT_PRIORITY = ["manufacturerName", "*Installation", "*Colour", "*Base type", "*Shade material", "*Features"]
 
 os.makedirs("debug", exist_ok=True)
 log_lines = []
@@ -51,6 +60,7 @@ def dump(name, obj):
         log("  [debug] не записалось %s: %s" % (name, e))
 
 
+# ---------- сеть ----------
 def get_raw(url, accept="application/json, text/*", tries=4, timeout=40):
     last = None
     for i in range(tries):
@@ -60,6 +70,11 @@ def get_raw(url, accept="application/json, text/*", tries=4, timeout=40):
                 "Referer": BASE + "/shop/c/chandeliers/all/"})
             with urllib.request.urlopen(req, timeout=timeout) as r:
                 return r.read()
+        except urllib.error.HTTPError as e:
+            last = e
+            if e.code in (400, 404):
+                break  # повтор не поможет (лимит листания / нет страницы)
+            time.sleep(2 * (i + 1))
         except Exception as e:
             last = e
             time.sleep(2 * (i + 1))
@@ -70,158 +85,190 @@ def get(url, accept="application/json, text/*", tries=4):
     return get_raw(url, accept, tries).decode("utf-8", "replace")
 
 
-def flt(q, text="", sort="price-asc", page=0):
-    u = BASE + "/yml/product-view/pl/filters?q=%s&text=%s&sort=%s&qs=&page=%d&ui=d&i=-1&c=750000000" % (
-        urllib.parse.quote(q), urllib.parse.quote(text), sort, page)
+def flt(q, page=0):
+    u = BASE + "/yml/product-view/pl/filters?q=%s&text=&sort=price-asc&qs=&page=%d&ui=d&i=-1&c=750000000" % (urllib.parse.quote(q), page)
     return json.loads(get(u))["data"]
 
 
-def res(q, text="", sort="price-asc", page=0):
-    u = BASE + "/yml/product-view/pl/results?page=%d&q=%s&text=%s&sort=%s&qs=&ui=d&i=-1&c=750000000" % (
-        page, urllib.parse.quote(q), urllib.parse.quote(text), sort)
+def res(q, page=0):
+    u = BASE + "/yml/product-view/pl/results?page=%d&q=%s&text=&sort=price-asc&qs=&ui=d&i=-1&c=750000000" % (page, urllib.parse.quote(q))
     return json.loads(get(u))["data"]
+
+
+# ---------- 1. категории и срезы ----------
+def facet_rows(d0, key):
+    """строки фильтра (только с товарами); key '*Room' — по окончанию id"""
+    for f in d0.get("filters", []):
+        fid = f.get("id", "")
+        if fid == key or (key.startswith("*") and fid.endswith(key)):
+            return fid, [r for r in f.get("rows", []) if r.get("count", 0) > 0]
+    return None, []
 
 
 def summary(d):
-    cards = d.get("cards", []) if isinstance(d, dict) else []
-    return {
-        "total": d.get("total") if isinstance(d, dict) else None,
-        "titles": [c.get("title") for c in cards[:12]],
-        "card_keys": sorted(cards[0].keys()) if cards else [],
-        "filters": [{"id": f.get("id"), "rows": [r.get("id") for r in f.get("rows", [])[:10]]}
-                    for f in d.get("filters", [])] if isinstance(d, dict) else [],
-    }
-
-
-# ---------- 1. поиск кода категории ----------
-def test_code(kind, cfg, code):
-    try:
-        d = flt(":category:" + code)
-    except Exception as e:
-        log("  код %s: ошибка %s" % (code, str(e)[:80]))
-        return False
-    s = summary(d)
-    dump("cat_%s_%s" % (kind, code), s)
-    titles = s["titles"]
-    ok = sum(1 for t in titles if t and re.search(cfg["title_re"], t, re.I))
-    log("  код %s: total=%s, подходящих названий %d из %d" % (code, s["total"], ok, len(titles)))
-    return bool(s["total"] and s["total"] >= 30 and titles and ok / len(titles) >= 0.5)
+    cards = d.get("cards", [])
+    return {"total": d.get("total"), "titles": [c.get("title") for c in cards[:12]], "card_keys": sorted(cards[0].keys()) if cards else [],
+            "filters": [{"id": f.get("id"), "rows": [[r.get("id"), r.get("count")] for r in f.get("rows", [])[:12]]} for f in d.get("filters", [])]}
 
 
 def discover(kind, cfg):
-    log("поиск категории: %s" % cfg["label"])
     for code in cfg["codes"]:
-        if test_code(kind, cfg, code):
-            return code
-    found = []
-    for text in cfg["texts"]:
         try:
-            d = flt("", text=text)
+            d = flt(":category:" + code)
         except Exception as e:
-            log("  текстовый поиск '%s': ошибка %s" % (text, str(e)[:80]))
+            log("  код %s: ошибка %s" % (code, str(e)[:80]))
             continue
-        dump("text_%s_%s" % (kind, text), summary(d))
-        log("  текстовый поиск '%s': total=%s" % (text, d.get("total")))
-        for f in d.get("filters", []):
-            for r in f.get("rows", []):
-                m = re.search(r"category:([^:]+)", str(r.get("id", "")))
-                if m and m.group(1) not in found:
-                    found.append(m.group(1))
-    for code in found[:8]:
-        if test_code(kind, cfg, code):
+        s = summary(d)
+        dump("cat_%s_%s" % (kind, code), s)
+        titles = s["titles"]
+        ok = sum(1 for t in titles if t and re.search(cfg["title_re"], t, re.I))
+        log("  код %s: total=%s, подходящих названий %d из %d" % (code, s["total"], ok, len(titles)))
+        if s["total"] and s["total"] >= 30 and titles and ok / len(titles) >= 0.5:
             return code
     return None
 
 
-# ---------- 2. список ----------
-def price_part(lo):
-    f = lambda n: "{:,}".format(int(n)).replace(",", " ")
-    return ":price:%s - %s т" % (f(lo), f(PRICE_MAX))
+def price_range(label):
+    nums = [int(n.replace(" ", "")) for n in re.findall(r"\d[\d ]*\d|\d", label)]
+    if label.startswith("до") and nums:
+        return 0, nums[0]
+    if label.startswith("более") and nums:
+        return nums[0], 10 ** 12
+    if len(nums) >= 2:
+        return nums[0], nums[1]
+    return 0, 10 ** 12
+
+
+def slices(q, d0=None, depth=0):
+    """рекурсивно режем запрос фильтрами, пока срез не влезет в лимит листания"""
+    d0 = d0 or flt(q)
+    total = d0.get("total", 0)
+    if not total:
+        return []
+    if total <= CAP:
+        return [(q, d0)]
+    for key in SPLIT_PRIORITY:
+        fid, rows = facet_rows(d0, key)
+        if not rows or (":" + fid + ":") in q:
+            continue
+        log("  %sсрез %d шт. режу по '%s' (%d знач.)" % ("  " * depth, total, fid, len(rows)))
+        out = []
+        for r in rows:
+            time.sleep(0.15)
+            try:
+                out += slices(q + r["id"], None, depth + 1)
+            except Exception as e:
+                log("  ошибка среза %s: %s" % (r["id"][:50], str(e)[:80]))
+        return out
+    log("  %sсрез %d шт. нечем резать дальше — берём первые %d" % ("  " * depth, total, CAP))
+    return [(q, d0)]
+
+
+def base_slices(kind, cfg, code):
+    q0 = ":category:" + code
+    d = flt(q0)
+    if kind == "chandelier" and ROOM.lower() not in ("любая", "any", "все"):
+        _, rows = facet_rows(d, "*Room")
+        m = [r for r in rows if r["id"].lower().endswith(":" + ROOM.lower())]
+        if m:
+            q0 += m[0]["id"]
+            log("  фильтр комнаты: %s" % ROOM)
+        else:
+            log("  комната '%s' не найдена среди %s — без фильтра комнаты" % (ROOM, [r["id"].split(":")[-1] for r in rows]))
+    if kind == "sconce":
+        _, rows = facet_rows(d, "*Purpose")
+        m = [r for r in rows if "жил" in r["id"].lower()]
+        if m:
+            q0 += m[0]["id"]
+            log("  фильтр назначения: для жилых помещений")
+    d = flt(q0)
+    log("  после предустановленных фильтров: %s шт." % d.get("total"))
+    fid, rows = facet_rows(d, "price")
+    out = []
+    if rows:
+        for r in rows:
+            lo, hi = price_range(r["id"].split(":", 2)[2])
+            if hi > PRICE_MIN and lo < PRICE_MAX:
+                log("  ценовой диапазон %s (%d шт.)" % (r["id"].split(":", 2)[2], r["count"]))
+                out += slices(q0 + r["id"])
+    else:
+        log("  ценовые фильтры не найдены — без разреза по цене")
+        out = slices(q0, d)
+    return out
 
 
 raw, seen_ids = [], set()
 
 
-def good(c, kind, cfg, text_mode):
-    t = htmllib.unescape(c.get("title", ""))
-    if BAD_TITLE.search(t):
-        return False
-    if text_mode and not re.search(cfg["title_re"], t, re.I):
-        return False
-    return True
+def good(c):
+    return not BAD_TITLE.search(htmllib.unescape(c.get("title", "")))
 
 
-def crawl(kind, cfg, code):
-    text_mode = code is None
-    base_q = "" if text_mode else ":category:" + code
-    texts = cfg["texts"] if text_mode else [""]
+def crawl(kind, cfg, q, d0):
+    total = d0.get("total", 0)
+    pages = min((total + 11) // 12, MAXPAGES)
+    errs = [0]
+
+    def page(p):
+        if p == 0:
+            return d0.get("cards", [])
+        time.sleep(0.15)
+        try:
+            return res(q, page=p)
+        except Exception:
+            errs[0] += 1
+            return []
     got = 0
-    for text in texts:
-        lo = 0
-        for rnd in range(10):
-            q = base_q + (price_part(lo) if lo else "")
-            try:
-                d0 = flt(q, text=text, page=0)
-            except Exception as e:
-                log("  [%s] ошибка первой страницы: %s" % (cfg["label"], str(e)[:100]))
-                break
-            total = d0.get("total", 0)
-            pages = (total + 11) // 12
-            last = lo
-            stopped_early = False
-            for p in range(pages):
-                try:
-                    cards = d0.get("cards", []) if p == 0 else res(q, text=text, page=p)
-                except Exception as e:
-                    log("  [%s] стоп на странице %d из %d: %s" % (cfg["label"], p, pages, str(e)[:100]))
-                    stopped_early = True
-                    break
-                if not cards:
-                    stopped_early = True
-                    break
-                for c in cards:
-                    last = max(last, c.get("unitPrice", 0))
-                    if c["id"] in seen_ids or c.get("unitPrice", 0) > PRICE_MAX:
-                        continue
-                    if not good(c, kind, cfg, text_mode):
-                        continue
-                    seen_ids.add(c["id"])
-                    c["_kind"] = kind
-                    raw.append(c)
-                    got += 1
-                if cards[-1].get("unitPrice", 0) > PRICE_MAX:
-                    break
-                time.sleep(0.4)
-            log("  [%s] раунд %d: total=%s, страниц %d, цена дошла до %s, собрано %d" % (
-                cfg["label"], rnd + 1, total, pages, last, got))
-            if stopped_early and last > lo and last < PRICE_MAX:
-                lo = last  # лимит листания (~100 страниц): продолжаем с достигнутой цены
-                continue
-            break
+    with ThreadPoolExecutor(max_workers=WORKERS) as ex:
+        for cards in ex.map(page, range(pages)):
+            for c in cards:
+                pr = c.get("unitPrice", 0)
+                if c["id"] in seen_ids or not (PRICE_MIN <= pr <= PRICE_MAX) or not good(c):
+                    continue
+                seen_ids.add(c["id"])
+                c["_kind"] = kind
+                raw.append(c)
+                got += 1
+    if errs[0]:
+        log("    страниц с ошибкой: %d из %d" % (errs[0], pages))
     return got
 
 
 for kind, cfg in KINDS.items():
+    log("== %s" % cfg["label"])
     code = discover(kind, cfg)
-    log("%s: код категории = %s" % (cfg["label"], code or "не найден, ищу по тексту"))
-    n = crawl(kind, cfg, code)
+    if not code:
+        log("%s: категория не найдена — смотри debug/" % cfg["label"])
+        continue
+    log("%s: код категории = %s" % (cfg["label"], code))
+    sl = base_slices(kind, cfg, code)
+    log("%s: срезов %d" % (cfg["label"], len(sl)))
+    n = 0
+    for i, (q, d0) in enumerate(sl):
+        n += crawl(kind, cfg, q, d0)
+        if i % 20 == 19:
+            log("  срезов обработано %d / %d, собрано %d" % (i + 1, len(sl), n))
     log("%s: собрано %d" % (cfg["label"], n))
 log("всего карточек: %d" % len(raw))
 
-# ---------- 3. прошлые данные (кэш характеристик, хэшей, истории цен) ----------
-prev = {}
-first_run = True
+# ---------- 2. прошлые данные (кэш) ----------
+prev, base_date = {}, TODAY
 if os.path.exists("data.json"):
     try:
         pd = json.load(open("data.json", encoding="utf-8"))
         prev = {x["id"]: x for x in pd.get("items", [])}
-        first_run = not prev
+        base_date = pd.get("base_date") or pd.get("date") or TODAY
     except Exception as e:
         log("прошлый data.json не прочитался: %s" % e)
+hash_map = {}
+for p in prev.values():
+    for u, h in zip(p.get("images", [])[:HASH_IMAGES], p.get("dh", [])):
+        if h:
+            hash_map[u] = h
 
-
-# ---------- 4. характеристики карточки ----------
+# ---------- 3. характеристики ----------
 SPEC_RE = re.compile(r'<h4 class="specifications-list__header">(.*?)</h4>|<dl key="[^"]*" class="specifications-list__spec"><dt[^>]*><span class="specifications-list__spec-term-text">(.*?)</span></dt><dd class="specifications-list__spec-definition">(.*?)</dd></dl>', re.S)
+KEEP_SPEC = re.compile(r"диаметр|высота|ширина|длина|цоколь|количество|кол-во|число|материал|стиль|площадь", re.I)
 
 
 def clean(s):
@@ -255,24 +302,10 @@ def to_cm(value):
     return round(n, 1) if 3 <= n <= 250 else None
 
 
-KEEP_SPEC = re.compile(r"диаметр|высота|ширина|длина|цоколь|количество|кол-во|число|мощность|материал|стиль|цвет|площадь|тип", re.I)
-
-
-def fetch_specs(c):
-    url = BASE + "/shop" + c["shopLink"]
-    try:
-        return c, specs_of(get(url, "text/html,application/xhtml+xml")), None
-    except Exception as e:
-        return c, None, str(e)
-    finally:
-        time.sleep(0.3)
-
-
 def derive(title, sp):
-    d = {n: v for _, n, v in sp}
     diam = height = lamps = None
     socket = ""
-    for n, v in d.items():
+    for n, v in sp:
         ln = n.lower()
         if diam is None and "диаметр" in ln:
             diam = to_cm(v)
@@ -299,7 +332,98 @@ def derive(title, sp):
     return diam, height, lamps, socket
 
 
-# ---------- 5. хэши фото (dHash 16x16 = 256 бит) ----------
+def fetch_specs(c):
+    try:
+        sp = specs_of(get(BASE + "/shop" + c["shopLink"], "text/html,application/xhtml+xml"))
+        time.sleep(0.1)
+        return c, sp, None
+    except Exception as e:
+        return c, None, str(e)
+
+
+sp_map = {}
+
+
+def build_items():
+    items = []
+    for c in raw:
+        p = prev.get(c["id"])
+        sp = sp_map.get(c["id"])
+        if sp is None and p and p.get("specs") is not None:
+            sp = [(n, v) for n, v in p["specs"]]
+        else:
+            sp = [(n, v) for _, n, v in sp] if sp is not None else None
+        diam, height, lamps, socket = derive(c["title"], sp or [])
+        if sp is None and p:   # характеристики ещё не загружены: берём прошлые значения, если были
+            diam, height, lamps, socket = p.get("diam", diam), p.get("height", height), p.get("lamps", lamps), p.get("socket", socket)
+        imgs = []
+        for pi in (c.get("previewImages") or []):
+            u = pi.get("medium") or pi.get("small") or pi.get("large")
+            if u and u not in imgs:
+                imgs.append(u)
+        imgs = imgs[:2]
+        price = c["unitPrice"]
+        hist = list(p.get("hist", [])) if p else []
+        if not hist or hist[-1][1] != price:
+            hist.append([TODAY, price])
+        hist = hist[-12:]
+        items.append({
+            "id": c["id"], "kind": c.get("_kind", "chandelier"), "title": htmllib.unescape(c["title"]), "brand": c.get("brand", ""),
+            "price": price, "rating": c.get("rating"), "url": BASE + "/shop" + c["shopLink"].split("?")[0], "images": imgs,
+            "dh": [hash_map.get(u) for u in imgs[:HASH_IMAGES]], "diam": diam, "height": height, "lamps": lamps, "socket": socket,
+            "specs": ([[n, v] for n, v in sp if KEEP_SPEC.search(n)][:8] if sp is not None else None),
+            "hist": hist, "prev_price": hist[-2][1] if len(hist) > 1 else None,
+            "first_seen": p.get("first_seen", TODAY) if p else TODAY,
+        })
+    items.sort(key=lambda x: x["price"])
+    return items
+
+
+def save(tag):
+    items = build_items()
+    if len(items) < MIN_ITEMS_OK:
+        log("[%s] мало карточек (%d) — data.json не трогаю" % (tag, len(items)))
+        return items
+    by_kind = {k: sum(1 for i in items if i["kind"] == k) for k in KINDS}
+    with_specs = sum(1 for i in items if i["specs"] is not None)
+    json.dump({"generated": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M UTC"), "date": TODAY, "base_date": base_date,
+               "count": len(items), "kinds": by_kind, "with_specs": with_specs, "filters": {"price": [PRICE_MIN, PRICE_MAX], "room": ROOM},
+               "items": items}, open("data.json", "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+    log("[%s] data.json: %d карточек, характеристики у %d, с диаметром %d, хэш фото у %d" % (
+        tag, len(items), with_specs, sum(1 for i in items if i["diam"]), sum(1 for i in items if any(i["dh"]))))
+    return items
+
+
+save("после списка")
+
+need = [c for c in raw if not (prev.get(c["id"]) and prev[c["id"]].get("specs") is not None)]
+need.sort(key=lambda c: c["unitPrice"])
+log("характеристики: всего %d, из кэша %d, грузим %d (лимит времени %d мин)" % (len(raw), len(raw) - len(need), len(need), T_SPECS // 60))
+failed_total = 0
+for i in range(0, len(need), 200):
+    if time.time() - START > T_SPECS:
+        log("лимит времени на характеристики: осталось %d карточек — продолжу при следующем запуске" % (len(need) - i))
+        break
+    chunk = need[i:i + 200]
+    bad = 0
+    with ThreadPoolExecutor(max_workers=WORKERS) as ex:
+        for c, sp, err in ex.map(fetch_specs, chunk):
+            if sp is None:
+                bad += 1
+            else:
+                sp_map[c["id"]] = sp
+    failed_total += bad
+    log("  характеристики: %d / %d (ошибок в пачке %d)" % (min(i + 200, len(need)), len(need), bad))
+    if bad > len(chunk) * 0.5:
+        log("  много ошибок — вероятно ограничение скорости, пауза 60 с")
+        time.sleep(60)
+    if (i // 200) % 3 == 2:
+        save("промежуточно")
+log("характеристики не загрузились у %d карточек" % failed_total)
+save("после характеристик")
+
+
+# ---------- 4. хэши фото (dHash 16x16) ----------
 def dhash(data, size=16):
     im = Image.open(io.BytesIO(data))
     if im.mode in ("RGBA", "LA", "P"):
@@ -318,140 +442,32 @@ def dhash(data, size=16):
 
 def hash_url(url):
     try:
-        return dhash(get_raw(url, "image/*", tries=3, timeout=30))
+        return url, dhash(get_raw(url, "image/*", tries=2, timeout=30))
     except Exception:
-        return None
+        return url, None
 
 
-# ---------- 6. сборка ----------
-def build(c, sp):
-    diam, height, lamps, socket = derive(c["title"], sp or [])
-    imgs = []
-    for pi in (c.get("previewImages") or []):
-        u = pi.get("medium") or pi.get("small") or pi.get("large")
-        if u and u not in imgs:
-            imgs.append(u)
-    return {
-        "id": c["id"], "kind": c.get("_kind", "chandelier"), "title": htmllib.unescape(c["title"]),
-        "brand": c.get("brand", ""), "price": c["unitPrice"], "rating": c.get("rating"),
-        "reviews": c.get("reviewsQuantity"), "url": BASE + "/shop" + c["shopLink"].split("?")[0],
-        "images": imgs[:3], "diam": diam, "height": height, "lamps": lamps, "socket": socket,
-        "specs": [[n, v] for _, n, v in (sp or []) if KEEP_SPEC.search(n)][:14],
-    }
-
-
-need = [c for c in raw if not (prev.get(c["id"]) and prev[c["id"]].get("specs") is not None)]
-log("карточки: всего %d, из кэша %d, грузим %d" % (len(raw), len(raw) - len(need), len(need)))
-sp_map, failed = {}, 0
-with ThreadPoolExecutor(max_workers=4) as ex:
-    for i, (c, sp, err) in enumerate(ex.map(fetch_specs, need)):
-        if i % 100 == 0:
-            log("  характеристики: %d / %d" % (i, len(need)))
-        if sp is None:
-            failed += 1
-        else:
-            sp_map[c["id"]] = sp
-log("характеристики не загрузились у %d карточек" % failed)
-
-items = []
-for c in raw:
-    p = prev.get(c["id"])
-    if c["id"] in sp_map:
-        it = build(c, sp_map[c["id"]])
-    elif p and p.get("specs") is not None:
-        it = build(c, [("", n, v) for n, v in p["specs"]])
-        for k in ("diam", "height", "lamps", "socket"):
-            it[k] = p.get(k)
-        it["specs"] = p["specs"]
-    else:
-        it = build(c, [])
-    hist = list(p.get("hist", [])) if p else []
-    if not hist or hist[-1][1] != it["price"]:
-        hist.append([TODAY, it["price"]])
-    it["hist"] = hist[-12:]
-    it["prev_price"] = it["hist"][-2][1] if len(it["hist"]) > 1 else None
-    it["first_seen"] = p.get("first_seen", TODAY) if p else TODAY
-    it["_prev_hashes"] = dict(zip(p.get("images", []), p.get("dh", []))) if p else {}
-    items.append(it)
-
-# хэши
 if Image is None:
     log("Pillow не установлен — хэши фото пропущены")
-    for it in items:
-        it["dh"] = []
 else:
     jobs = []
-    for it in items:
-        for u in it["images"][:HASH_IMAGES]:
-            if not it["_prev_hashes"].get(u):
+    for c in raw:
+        for pi in (c.get("previewImages") or [])[:1]:
+            u = pi.get("medium") or pi.get("small") or pi.get("large")
+            if u and u not in hash_map and u not in jobs:
                 jobs.append(u)
     log("хэширование фото: нужно %d" % len(jobs))
-    done = {}
-    with ThreadPoolExecutor(max_workers=8) as ex:
-        for i, (u, h) in enumerate(zip(jobs, ex.map(hash_url, jobs))):
-            if i % 300 == 0:
-                log("  фото: %d / %d" % (i, len(jobs)))
-            done[u] = h
-    bad = 0
-    for it in items:
-        dh, imgs = [], []
-        for u in it["images"][:HASH_IMAGES]:
-            h = it["_prev_hashes"].get(u) or done.get(u)
-            if h:
-                dh.append(h)
-                imgs.append(u)
-            else:
-                bad += 1
-        it["dh"] = dh
-        it["hashed_images"] = imgs
-    log("фото без хэша: %d" % bad)
-for it in items:
-    it.pop("_prev_hashes", None)
-
-# ---------- 7. эталон по ссылке (необязательно) ----------
-ref_url = os.environ.get("REF_URL", "").strip()
-if ref_url:
-    try:
-        m = re.search(r"-(\d{5,})/?(?:[?#]|$)", ref_url) or re.search(r"(\d{6,})", ref_url)
-        rid = m.group(1) if m else None
-        if rid and not any(i["id"] == rid for i in items):
-            page = get(ref_url.split("?")[0], "text/html,application/xhtml+xml")
-            title = clean(re.search(r"<h1[^>]*>(.*?)</h1>", page, re.S).group(1)) if re.search(r"<h1[^>]*>", page) else ""
-            og = re.search(r'property="og:image"\s+content="([^"]+)"', page)
-            price = None
-            pm = re.search(r'"(?:lowPrice|price)"\s*:\s*"?(\d+)', page)
-            if pm:
-                price = int(pm.group(1))
-            sp = specs_of(page)
-            diam, height, lamps, socket = derive(title, sp)
-            imgs = [og.group(1)] if og else []
-            dh = [h for h in [hash_url(u) for u in imgs] if h] if Image else []
-            items.append({"id": rid, "kind": "chandelier", "title": title or ("Эталон " + rid), "brand": "", "price": price or 0,
-                          "rating": None, "reviews": None, "url": ref_url.split("?")[0], "images": imgs, "diam": diam,
-                          "height": height, "lamps": lamps, "socket": socket, "specs": [[n, v] for _, n, v in sp if KEEP_SPEC.search(n)][:14],
-                          "dh": dh, "hashed_images": imgs, "hist": [[TODAY, price or 0]], "prev_price": None,
-                          "first_seen": TODAY, "ref": True})
-            log("эталон добавлен: %s (%s ₸)" % (title, price))
-        else:
-            log("эталон уже в базе или id не найден в ссылке")
-    except Exception as e:
-        log("эталон по ссылке не добавился: %s" % str(e)[:120])
-
-for it in items:
-    hi = it.pop("hashed_images", None)
-    if hi is not None:  # сначала фото с хэшем, чтобы dh[i] соответствовал images[i]
-        it["images"] = hi + [u for u in it["images"] if u not in hi]
-items.sort(key=lambda x: x["price"])
-by_kind = {k: sum(1 for i in items if i["kind"] == k) for k in KINDS}
-log("итого: %d (%s), с хэшем фото: %d, с диаметром: %d" % (
-    len(items), by_kind, sum(1 for i in items if i.get("dh")), sum(1 for i in items if i.get("diam"))))
-
-if len(items) < MIN_ITEMS_OK and prev:
-    log("СЛИШКОМ МАЛО карточек (%d) — старый data.json сохранён, смотри debug/ и лог" % len(items))
-elif len(items) < MIN_ITEMS_OK:
-    log("СЛИШКОМ МАЛО карточек (%d) — data.json не записан, смотри debug/ и лог выше" % len(items))
-else:
-    json.dump({"generated": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC"), "date": TODAY,
-               "first_run": first_run, "count": len(items), "kinds": by_kind, "items": items},
-              open("data.json", "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
-    log("готово: data.json")
+    for i in range(0, len(jobs), 400):
+        if time.time() - START > T_ALL:
+            log("лимит времени на фото: осталось %d — продолжу при следующем запуске" % (len(jobs) - i))
+            break
+        with ThreadPoolExecutor(max_workers=WORKERS * 2) as ex:
+            for u, h in ex.map(hash_url, jobs[i:i + 400]):
+                if h:
+                    hash_map[u] = h
+        log("  фото: %d / %d" % (min(i + 400, len(jobs)), len(jobs)))
+        if (i // 400) % 3 == 2:
+            save("промежуточно")
+items = save("итог")
+pending = sum(1 for i in items if i["specs"] is None)
+log("ГОТОВО. Без характеристик осталось: %d%s" % (pending, " — запусти парсер ещё раз, он продолжит" if pending else ""))

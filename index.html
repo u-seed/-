@@ -114,14 +114,15 @@ let DATA=[],META={},BY={},FAV=load("kl_fav",{}),KIND="all",SIZES=new Set(),MSIZE
 
 /* ---------- данные ---------- */
 const bucket=d=>d==null?"?":String(Math.max(10,Math.round(d/10)*10));
-const isNew=x=>!META.first_run&&x.first_seen===META.date;
+const isNew=x=>x.first_seen===META.date&&x.first_seen!==META.base_date;
 const isDrop=x=>x.prev_price&&x.price<x.prev_price;
 async function init(){
   try{
     const r=await fetch("data.json?"+Date.now(),{cache:"no-store"});
     const d=await r.json();
-    META=d;DATA=d.items||[];BY={};DATA.forEach(x=>{BY[x.id]=x;x._w=(x.dh||[]).map(words)});
-    $("meta").textContent=DATA.length?`Обновлено ${d.generated} · в базе ${DATA.length} (люстр ${d.kinds?d.kinds.chandelier:0}, бра ${d.kinds?d.kinds.sconce:0})`:"База пуста: запусти парсинг (Actions → parse-kaspi → Run workflow)";
+    META=d;DATA=d.items||[];BY={};DATA.forEach(x=>{BY[x.id]=x;x._w=(x.dh||[]).filter(Boolean).map(words)});
+    const pend=DATA.length-(d.with_specs==null?DATA.length:d.with_specs);
+    $("meta").textContent=DATA.length?`Обновлено ${d.generated} · в базе ${DATA.length} (люстр ${d.kinds?d.kinds.chandelier:0}, бра ${d.kinds?d.kinds.sconce:0})`+(pend>0?` · размеры загружены не у всех (${pend} без характеристик): запусти парсер ещё раз`:""):"База пуста: запусти парсинг (Actions → parse-kaspi → Run workflow)";
   }catch(e){$("meta").textContent="Не удалось загрузить data.json"}
   renderChips();renderCat();renderFav();
 }
@@ -260,7 +261,7 @@ function renderMatch(msg){
 function runMatch(){
   const id=parseId($("refin").value);
   if(!id)return renderMatch("Не нашёл номер товара в ссылке. Нужна ссылка вида <b>kaspi.kz/shop/p/…-123456789/</b>.");
-  if(!BY[id]){REFID=null;MRES=[];return renderMatch(`Карточки <b>${id}</b> нет в базе: она дороже лимита, из другой категории или ещё не попала в выгрузку. Запусти парсинг (Actions → parse-kaspi → Run workflow) и вставь эту ссылку в поле <b>ref_url</b>, тогда она добавится как эталон.`)}
+  if(!BY[id]){REFID=null;MRES=[];return renderMatch(`Карточки <b>${id}</b> нет в базе: она не подошла под фильтры парсинга (цена, комната для люстр) или появилась позже. Запусти парсер (Actions → parse-kaspi → Run workflow), при необходимости расширь цену или поставь комнату «любая».`)}
   findSimilar(id);renderMatch();
 }
 $("go").addEventListener("click",runMatch);
