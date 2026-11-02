@@ -35,6 +35,7 @@ T_SPEC_END = T_ALL * 0.80                             # характеристи
 OCR_WORKERS = int(env("OCR_WORKERS", str((os.cpu_count() or 2) + 1)))
 HASH_IMAGES = int(env("HASH_IMAGES", "1"))
 MIN_ITEMS_OK = 5
+FOCUS_PRICE = int(env("FOCUS_PRICE", "50000"))            # характеристики грузим от этой цены к краям (рабочий диапазон)
 TODAY = (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=5)).strftime("%Y-%m-%d")  # дата по Актау
 
 KINDS = {
@@ -447,7 +448,7 @@ save("после фото-хэшей")
 cur = build_items()
 nodiam = {i["id"] for i in cur if not i["diam"]}
 need = [c for c in raw if not (prev.get(c["id"]) and prev[c["id"]].get("specs") is not None)]
-need.sort(key=lambda c: (c["id"] not in nodiam, c.get("_kind") != "chandelier", c["unitPrice"] < 25000, c["unitPrice"]))
+need.sort(key=lambda c: (c["id"] not in nodiam, c.get("_kind") != "chandelier", abs(c["unitPrice"] - FOCUS_PRICE), c["unitPrice"]))
 log("характеристики: всего %d, из кэша %d, грузим %d" % (len(raw), len(raw) - len(need), len(need)))
 failed_total = 0
 for i in range(0, len(need), 200):
